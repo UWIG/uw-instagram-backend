@@ -7,6 +7,7 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,9 +30,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestBody Map<String,String> user){
-        String username = user.get("username");
-        String password = user.get("password");
+    public String loginUser(@RequestParam("username") String username, @RequestParam("password") String password){
+        //String username = user.getUsername();
+        //String password = user.getPassword();
         if (username == null || password == null) {
             return "Error_NULL Exception";
         }
