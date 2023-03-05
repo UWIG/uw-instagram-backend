@@ -11,5 +11,6 @@ public interface UserService {
     User UpdateUserByUsername(String id, String Username);
     User AddUser(User user);
     List<User> FindUserByUsername(String username);
+    List<User> FindUserByEmail(String email);
     void DeleteUser(User user);
 }

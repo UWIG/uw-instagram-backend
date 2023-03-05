@@ -70,6 +70,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public List<User> FindUserByEmail(String email) {
+        Criteria criteria = Criteria.where("email").is(email);
+        Query query = new Query(criteria);
+        List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        return documentList;
+    }
+
+    @Override
     public void DeleteUser(User user) {
         Criteria criteria = Criteria.where("email").is(user.getEmail());
         Query query = new Query(criteria);

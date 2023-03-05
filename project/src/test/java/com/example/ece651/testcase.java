@@ -16,7 +16,6 @@ public class testcase {
     @Test
     public void insert(){
         User user = new User();
-        user.setId("10");
         user.setEmail("1425340771@qq.com");
         user.setUsername("WLX");
         user.setPassword("wlx13637135553");
