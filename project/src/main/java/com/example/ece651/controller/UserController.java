@@ -49,11 +49,11 @@ public class UserController {
     }
 
     @PostMapping("/login" )
-    public ResponseEntity<String> loginUser(@RequestBody Map<String,String> user){
+    public ResponseEntity<User> loginUser(@RequestBody Map<String,String> user){
         String username = user.get("username");
         String password = user.get("password");
         if (username == null || password == null) {
-            return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
+//            return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
         }
         List<User> userlist = userService.FindUserByUsername(username);
         for(int i=0;i<userlist.size();i++){
@@ -63,23 +63,25 @@ public class UserController {
             //System.out.println(password);
             //System.out.println(cur_username+" "+cur_password);
             if (cur_password.equals(password)){
-                return new ResponseEntity<>("login successful by username", HttpStatus.OK);
+                return new ResponseEntity<>(current_user, HttpStatus.OK);
             }
         }
 
         List<User> userlist1 = userService.FindUserByEmail(username);
-        for(int i=0;i<userlist1.size();i++){
+        for(int i=0;i<userlist1.size();i++) {
             User current_user = userlist1.get(i);
             //String cur_username = current_user.getUsername();
             String cur_password = current_user.getPassword();
             //System.out.println(password);
             //System.out.println(cur_username+" "+cur_password);
-            if (cur_password.equals(password)){
-                return new ResponseEntity<>("login successful by email", HttpStatus.OK);
+            if (cur_password.equals(password)) {
+                return new ResponseEntity<>(current_user, HttpStatus.OK);
             }
         }
 
-        return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new User(),HttpStatus.UNAUTHORIZED);
+//
+//        return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
     }
 
 

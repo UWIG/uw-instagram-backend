@@ -1,7 +1,0 @@
-
-spring:
-  data:
-    mongodb:
-      uri: mongodb+srv://wlxgod:wlx13637135553@cluster0.pvdqlsj.mongodb.net/?retryWrites=true&w=majority
-      database: instagram
-      port: 27017
