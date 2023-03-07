@@ -4,6 +4,7 @@ import com.example.ece651.domain.Comment;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Post;
 import com.example.ece651.domain.User;
+import jakarta.annotation.Resource;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -20,11 +21,27 @@ public class PostService {
     @Autowired
     private MediaService mediaService;
 
-    @Autowired
+    @Resource
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private UserServiceImpl userService;
 
     public List<Post> allPosts(){
         return mongoTemplate.findAll(Post.class,"post");
+    }
+
+    public List<Post> getPostssByUsername(String username){
+        User user = userService.FindUserByUsername(username).get(0);
+        //user.getPosts();
+        return user.getPosts();
+    }
+
+    public List<Post> getPostsByUserId(String id){
+        ObjectId id_transfer = new ObjectId(id);
+        User user = userService.FindUserByUserId(id_transfer);
+        //user.getPosts();
+        return user.getPosts();
     }
 
 //    public Optional<Post> singlePost(String username){
