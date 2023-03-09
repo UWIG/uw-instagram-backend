@@ -26,7 +26,6 @@ public class UserController {
         String username = user.get("username");
         String fullname = user.get("fullName");
         String password = user.get("password");
-        System.out.println(email + " " + username + " " + fullname + " " + password);
 
         if (username == "" || password == "" || fullname == "" || email == "") {
             return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);

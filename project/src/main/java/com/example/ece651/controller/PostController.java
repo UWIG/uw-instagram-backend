@@ -30,20 +30,20 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    /*@GetMapping("/{username}")
-    public ResponseEntity<List<Post>> getSinglePostByUserName(@PathVariable String username){
+    @GetMapping("/{username}")
+    public ResponseEntity<List<Post>> getPosts(@PathVariable String username){
         System.out.println(username);
-        List<Post> posts = postService.getPostssByUsername(username);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }*/
-
-    @GetMapping("/{userid}")
-    public ResponseEntity<List<Post>> getSinglePostByUserId(@PathVariable String userid){
-        System.out.println(userid);
-        //String userid = user.get("userid");
-        List<Post> posts = postService.getPostsByUserId(userid);
+        List<Post> posts = postService.getPostsByUsername(username);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
+
+//    @GetMapping("/{userid}")
+//    public ResponseEntity<List<Post>> getSinglePostByUserId(@PathVariable String userid){
+//        System.out.println(userid);
+//        //String userid = user.get("userid");
+//        List<Post> posts = postService.getPostsByUserId(userid);
+//        return new ResponseEntity<>(posts, HttpStatus.OK);
+//    }
 
 
     @PostMapping
