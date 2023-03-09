@@ -30,11 +30,21 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-//    @GetMapping("/{username}")
-//    public ResponseEntity<Optional<Post>> getSinglePost(@PathVariable String username){
-//        System.out.println(username);
-//        return new ResponseEntity<>(postService.singlePost(username),HttpStatus.OK);
-//    }
+    /*@GetMapping("/{username}")
+    public ResponseEntity<List<Post>> getSinglePostByUserName(@PathVariable String username){
+        System.out.println(username);
+        List<Post> posts = postService.getPostssByUsername(username);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }*/
+
+    @GetMapping("/{userid}")
+    public ResponseEntity<List<Post>> getSinglePostByUserId(@PathVariable String userid){
+        System.out.println(userid);
+        //String userid = user.get("userid");
+        List<Post> posts = postService.getPostsByUserId(userid);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
 
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Map<String,String> payload){

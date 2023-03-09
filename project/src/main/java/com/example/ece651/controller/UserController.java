@@ -22,10 +22,11 @@ public class UserController {
     public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
         User user1 = new User();
 
-        String email = user.get("email");
+        String email = user.get("emailAddress");
         String username = user.get("username");
-        String fullname = user.get("fullname");
+        String fullname = user.get("fullName");
         String password = user.get("password");
+        System.out.println(email + " " + username + " " + fullname + " " + password);
 
         if (username == "" || password == "" || fullname == "" || email == "") {
             return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
@@ -33,10 +34,12 @@ public class UserController {
 
         List<User> userlist1 = userService.FindUserByUsername(username);
         if(userlist1.size() != 0){
+            System.out.println("Duplicate Username");
             return new ResponseEntity<>("username duplicate", HttpStatus.UNAUTHORIZED);
         }
         List<User> userlist2 = userService.FindUserByEmail(email);
         if(userlist2.size() != 0){
+            System.out.println("Duplicate Email");
             return new ResponseEntity<>("email duplicate", HttpStatus.UNAUTHORIZED);
         }
         //user1.setId(user.get("id"));

@@ -3,6 +3,7 @@ package com.example.ece651.service;
 import com.example.ece651.domain.User;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -69,12 +70,22 @@ public class UserServiceImpl implements UserService{
         return documentList;
     }
 
+
+
     @Override
     public List<User> FindUserByEmail(String email) {
         Criteria criteria = Criteria.where("email").is(email);
         Query query = new Query(criteria);
         List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         return documentList;
+    }
+
+    @Override
+    public User FindUserByUserId(ObjectId id) {
+        Criteria criteria = Criteria.where("_id").is(id);
+        Query query = new Query(criteria);
+        List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        return documentList.get(0);
     }
 
     @Override
