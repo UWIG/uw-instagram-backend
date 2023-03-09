@@ -1,6 +1,8 @@
 package com.example.ece651.controller;
 
 
+import com.example.ece651.domain.Media;
+import com.example.ece651.domain.Post;
 import com.example.ece651.domain.User;
 import com.example.ece651.service.UserServiceImpl;
 import lombok.extern.java.Log;
@@ -8,9 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import com.example.ece651.util.ResponseFormat;
 
 @CrossOrigin
 @RestController
@@ -86,7 +92,27 @@ public class UserController {
 //        return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
     }
 
+    @PostMapping("/user/changeAva")
+    public ResponseEntity<ResponseFormat> changeAvatar(@RequestParam("username") String username, @RequestParam("avatar") MultipartFile avatar) throws IOException {
+        System.out.println(username);
+        System.out.println(avatar);
 
+        Media media = userService.UpdateUserByAvatar(username, avatar);
 
+        ResponseFormat responseFormat = new ResponseFormat(media,1,"success");
+
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
+
+    @PostMapping("/user/getAva")
+    public ResponseEntity<ResponseFormat> getAvatar(@RequestParam("username") String username) throws IOException {
+        System.out.println(username);
+
+        Media media = userService.FindAvatarByUsername(username);
+
+        ResponseFormat responseFormat = new ResponseFormat(media,1,"success");
+
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
 
 }

@@ -1,15 +1,21 @@
 package com.example.ece651.service;
 
+import com.example.ece651.domain.Media;
 import com.example.ece651.domain.User;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
+import org.bson.BsonBinarySubType;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,6 +63,25 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Media UpdateUserByAvatar(String username, MultipartFile avatar) throws IOException {
+        Media media = new Media(new Binary(BsonBinarySubType.BINARY, avatar.getBytes()));
+        mongoTemplate.insert(media);
+
+//        Criteria criteria = Criteria.where("username").is(username);
+//        Query query = new Query(criteria);
+//        Update update = new Update().set("avatar", media.getId());
+//        UpdateResult result = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+
+        mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
+                .apply(new Update().set("avatar",media.getId()))
+                .first();
+        Criteria criteriaMedia = Criteria.where("_id").is(media.getId());
+        Query queryMedia = new Query(criteriaMedia);
+        Media mediaresult = mongoTemplate.find(queryMedia, Media.class, "media").get(0);
+        return mediaresult;
+    }
+
+    @Override
     public User AddUser(User user) {
         User newUser = mongoTemplate.insert(user, COLLECTION_NAME);
         return newUser;
@@ -86,6 +111,19 @@ public class UserServiceImpl implements UserService{
         Query query = new Query(criteria);
         List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         return documentList.get(0);
+    }
+
+    @Override
+    public Media FindAvatarByUsername(String username) {
+        Criteria criteria = Criteria.where("username").is(username);
+        Query query = new Query(criteria);
+        ObjectId mediaId =  mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0).getAvatar();
+
+        System.out.println(mediaId);
+        Criteria criteriaMedia = Criteria.where("_id").is(mediaId);
+        Query queryMedia = new Query(criteriaMedia);
+        Media media = mongoTemplate.find(queryMedia, Media.class, "media").get(0);
+        return media;
     }
 
     @Override
