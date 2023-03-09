@@ -33,6 +33,7 @@ public class PostService {
 
     public List<Post> getPostsByUsername(String username){
         User user = userService.FindUserByUsername(username).get(0);
+        System.out.println(user);
         //user.getPosts();
         return user.getPosts();
     }

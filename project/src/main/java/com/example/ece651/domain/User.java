@@ -28,6 +28,7 @@ public class User {
     private String last_name;
     private String gender;
     private String dateOfBirth;
+    @DBRef
     private ObjectId avatar;
     private String last_login;
     private String is_blocked;
