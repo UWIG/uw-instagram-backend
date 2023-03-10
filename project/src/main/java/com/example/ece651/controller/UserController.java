@@ -96,23 +96,23 @@ public class UserController {
     public ResponseEntity<ResponseFormat> changeAvatar(@RequestParam("username") String username, @RequestParam("avatar") MultipartFile avatar) throws IOException {
         System.out.println(username);
         System.out.println(avatar);
-
         Media media = userService.UpdateUserByAvatar(username, avatar);
-
         ResponseFormat responseFormat = new ResponseFormat(media,1,"success");
-
         return new ResponseEntity<>(responseFormat,HttpStatus.OK);
     }
 
-    @PostMapping("/user/getAva")
-    public ResponseEntity<ResponseFormat> getAvatar(@RequestParam("username") String username) throws IOException {
+    @GetMapping("/{username}/avatar")
+    public ResponseEntity<Media> getAvatar(@PathVariable String username) throws IOException {
         System.out.println(username);
-
         Media media = userService.FindAvatarByUsername(username);
+        return new ResponseEntity<>(media,HttpStatus.OK);
+    }
 
-        ResponseFormat responseFormat = new ResponseFormat(media,1,"success");
-
-        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getUser(@PathVariable String username) throws IOException {
+        System.out.println(username);
+        User user = userService.FindUserByUsername(username).get(0);
+        return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
 }

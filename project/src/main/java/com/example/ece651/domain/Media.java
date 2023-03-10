@@ -1,5 +1,6 @@
 package com.example.ece651.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;

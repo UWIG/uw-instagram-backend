@@ -65,13 +65,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Media UpdateUserByAvatar(String username, MultipartFile avatar) throws IOException {
         Media media = new Media(new Binary(BsonBinarySubType.BINARY, avatar.getBytes()));
-
+//
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
         //find the user
         User user = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0);
-
-        //if the avatar not exist
+//        if the avatar not exist
         if (user.getAvatar() == null) {
             mongoTemplate.insert(media);
             Update update = new Update().set("avatar", media.getId());
@@ -79,12 +78,12 @@ public class UserServiceImpl implements UserService {
         }
         //if the avatar exist
         else {
-            ObjectId mediaId = user.getAvatar();
-            mongoTemplate.update(Media.class).matching(Criteria.where("_id").is(mediaId))
+            Media prevMedia = user.getAvatar();
+            mongoTemplate.update(Media.class).matching(Criteria.where("_id").is(prevMedia.getId()))
                     .apply(new Update().set("data", media.getData()))
                     .first();
         }
-        return null;
+        return media;
     }
 
     @Override
@@ -122,16 +121,7 @@ public class UserServiceImpl implements UserService {
     public Media FindAvatarByUsername(String username) {
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
-        ObjectId mediaId = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0).getAvatar();
-
-        System.out.println(mediaId);
-        Criteria criteriaMedia = Criteria.where("_id").is(mediaId);
-        Query queryMedia = new Query(criteriaMedia);
-        if(mongoTemplate.find(queryMedia, Media.class, "media").isEmpty()){
-            return null;
-        }
-        Media media = mongoTemplate.find(queryMedia, Media.class, "media").get(0);
-
+        Media media = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0).getAvatar();
         return media;
     }
 

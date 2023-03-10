@@ -29,7 +29,7 @@ public class User {
     private String gender;
     private String dateOfBirth;
     @DBRef
-    private ObjectId avatar;
+    private Media avatar;
     private String last_login;
     private String is_blocked;
     private String time_created;
