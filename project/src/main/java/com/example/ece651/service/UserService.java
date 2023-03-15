@@ -17,6 +17,7 @@ public interface UserService {
     User AddUser(User user);
     List<User> FindUserByUsername(String username);
     List<User> FindUserByEmail(String email);
+    List<User> FindUserBykeyword(String keyword);
     User FindUserByUserId(ObjectId id);
     Media FindAvatarByUsername(String username);
     void DeleteUser(User user);

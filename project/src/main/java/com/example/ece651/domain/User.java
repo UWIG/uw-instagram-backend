@@ -37,6 +37,8 @@ public class User {
     @DBRef
     private List<ObjectId> followees;
     @DBRef
+    private List<ObjectId> followers;
+    @DBRef
     private List<Post> posts;
     @DBRef
     private List<Post> saved_posts;

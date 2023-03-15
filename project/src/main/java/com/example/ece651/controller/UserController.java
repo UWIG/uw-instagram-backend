@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +91,23 @@ public class UserController {
         return new ResponseEntity<>(new User(),HttpStatus.UNAUTHORIZED);
 //
 //        return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<User> searchUser(@RequestBody Map<String,List<String>> body){
+        List<User> list = new ArrayList<>();
+        List<String> keywords = body.get("keywords");
+        for(int i=0;i<keywords.size();i++){
+            List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
+            for(int j=0;j<list1.size();j++){
+                if(!list.contains(list1.get(j))){
+                    list.add(list1.get(j));
+                }
+            }
+        }
+        System.out.println(list.size());
+        ResponseEntity response = new ResponseEntity<>(list,HttpStatus.OK);
+        return response;
     }
 
     @PostMapping("/user/changeAva")

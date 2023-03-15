@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -105,6 +106,14 @@ public class UserServiceImpl implements UserService {
     public List<User> FindUserByEmail(String email) {
         Criteria criteria = Criteria.where("email").is(email);
         Query query = new Query(criteria);
+        List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        return documentList;
+    }
+
+    @Override
+    public List<User> FindUserBykeyword(String keyword) {
+        Pattern pattern= Pattern.compile("^.*"+keyword+".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query(Criteria.where("username").regex(pattern));
         List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         return documentList;
     }
