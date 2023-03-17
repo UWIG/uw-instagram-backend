@@ -33,7 +33,12 @@ public class PostController {
     @GetMapping("/{username}")
     public ResponseEntity<List<Post>> getPosts(@PathVariable String username){
         System.out.println(username);
-        List<Post> posts = postService.getPostsByUsername(username);
+        List<Post> posts = new ArrayList<Post>();
+        posts = postService.getPostsByUsername(username);
+        if(posts != null)
+            System.out.println(posts.size());
+        else
+            posts = new ArrayList<Post>();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 

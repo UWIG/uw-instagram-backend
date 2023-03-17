@@ -35,9 +35,9 @@ public class User {
     private String time_created;
     private String fullname;
     @DBRef
-    private List<ObjectId> followees;
+    private List<User> followees;
     @DBRef
-    private List<ObjectId> followers;
+    private List<User> follows;
     @DBRef
     private List<Post> posts;
     @DBRef
