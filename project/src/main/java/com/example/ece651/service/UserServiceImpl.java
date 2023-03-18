@@ -140,6 +140,60 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String AddUserFollowList(String currentUserName, String targetUserName) {
+
+        User targetUser = FindUserByUsername(targetUserName);
+        User currentUser = FindUserByUsername(currentUserName);
+
+        //Add curr_user into targetuser's followee list
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(targetUserName));
+
+        Update update1 = new Update();
+        update1.addToSet("followees",currentUser);
+
+        mongoTemplate.updateFirst(query, update1, User.class);
+
+        //Add target_user into curr_user's follow list
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("username").is(currentUserName));
+
+        Update update2 = new Update();
+        update2.addToSet("follows",targetUser);
+
+        mongoTemplate.updateFirst(query1, update2, User.class);
+
+        return "successful";
+    }
+
+    @Override
+    public String DeleteUserFollowList(String currentUserName, String targetUserName) {
+        User targetUser = FindUserByUsername(targetUserName);
+        User currentUser = FindUserByUsername(currentUserName);
+
+        //Delete curr_user into targetuser's followee list
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(targetUserName));
+
+        Update update1 = new Update();
+        update1.pull("followees",currentUser);
+
+        mongoTemplate.updateFirst(query, update1, User.class);
+
+        //Delete target_user into curr_user's follow list
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("username").is(currentUserName));
+
+        Update update2 = new Update();
+        update2.pull("follows",targetUser);
+
+        mongoTemplate.updateFirst(query1, update2, User.class);
+
+        return "successful";
+    }
+
+
+    @Override
     public void DeleteUser(User user) {
         Criteria criteria = Criteria.where("email").is(user.getEmail());
         Query query = new Query(criteria);

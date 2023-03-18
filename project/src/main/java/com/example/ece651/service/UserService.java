@@ -20,6 +20,8 @@ public interface UserService {
     List<User> FindUserBykeyword(String keyword);
     User FindUserByUserId(ObjectId id);
     Media FindAvatarByUsername(String username);
+    String AddUserFollowList(String currentUserName, String targetUserName);
+    String DeleteUserFollowList(String currentUserName, String targetUserName);
     void DeleteUser(User user);
 
 }

@@ -3,10 +3,14 @@ package com.example.ece651.controller;
 
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Post;
+import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.java.Log;
+import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.example.ece651.util.ResponseFormat;
 
@@ -67,7 +72,7 @@ public class UserController {
         String username = user.get("username");
         String password = user.get("password");
         if (username == null || password == null) {
-//            return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new User(), HttpStatus.UNAUTHORIZED);
         }
         User cur_user = userService.FindUserByUsername(username);
 //        for(int i=0;i<userlist.size();i++){
@@ -93,22 +98,38 @@ public class UserController {
         }
 
         return new ResponseEntity<>(new User(),HttpStatus.UNAUTHORIZED);
-//
-//        return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
+
+        //return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<User> searchUser(@RequestBody Map<String,List<String>> body){
-        List<User> list = new ArrayList<>();
+    @PostMapping("/search/{username}")
+    public ResponseEntity<User> searchUser(@RequestBody Map<String,List<String>> body,@PathVariable String username){
+        List<Searchbody> list = new ArrayList<>();
         List<String> keywords = body.get("keywords");
-        for(int i=0;i<keywords.size();i++){
-            List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
-            for(int j=0;j<list1.size();j++){
-                if(!list.contains(list1.get(j))){
-                    list.add(list1.get(j));
-                }
-            }
-        }
+
+        User search_user = userService.FindUserByUsername(username);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+//        for(int i=0;i<keywords.size();i++){
+//            List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
+//            for(int j=0;j<list1.size();j++){
+//                User cur_user = list1.get(j);
+//                List<User> followlist = search_user.getFollows();
+//                Boolean flag = false;
+//                for(int ii=0;ii<followlist.size();ii++){
+//                    User user_follow =  followlist.get(ii);
+//                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+//                    if(Objects.equals(cur_user.getUsername(), user_follow.getUsername()))
+//                        flag = true;
+//                }
+//
+//                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
+//                if(!list.contains(searchbody)){
+//                    list.add(searchbody);
+//                }
+//            }
+//        }
         System.out.println(list.size());
         ResponseEntity response = new ResponseEntity<>(list,HttpStatus.OK);
         return response;
@@ -136,5 +157,23 @@ public class UserController {
         User user = userService.FindUserByUsername(username);
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
+
+    @PostMapping("/setFollow")
+    public ResponseEntity<String> setFollow(@RequestBody Map<String,String> body){
+
+        String response = userService.AddUserFollowList(body.get("currentUserName"),body.get("targetUserName"));
+        ResponseEntity response1 = new ResponseEntity<>(response,HttpStatus.OK);
+        return response1;
+    }
+
+    @PostMapping("/cancelFollow")
+    public ResponseEntity<String> cancelFollow(@RequestBody Map<String,String> body){
+
+        String response = userService.DeleteUserFollowList(body.get("currentUserName"),body.get("targetUserName"));
+        ResponseEntity response1 = new ResponseEntity<>(response,HttpStatus.OK);
+        return response1;
+    }
+
+
 
 }
