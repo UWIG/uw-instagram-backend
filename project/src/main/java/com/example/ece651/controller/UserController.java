@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.java.Log;
 import org.bson.types.Binary;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -109,27 +110,27 @@ public class UserController {
 
         User search_user = userService.FindUserByUsername(username);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        //ObjectMapper objectMapper = new ObjectMapper();
 
-//        for(int i=0;i<keywords.size();i++){
-//            List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
-//            for(int j=0;j<list1.size();j++){
-//                User cur_user = list1.get(j);
-//                List<User> followlist = search_user.getFollows();
-//                Boolean flag = false;
-//                for(int ii=0;ii<followlist.size();ii++){
-//                    User user_follow =  followlist.get(ii);
-//                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
-//                    if(Objects.equals(cur_user.getUsername(), user_follow.getUsername()))
-//                        flag = true;
-//                }
-//
-//                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
-//                if(!list.contains(searchbody)){
-//                    list.add(searchbody);
-//                }
-//            }
-//        }
+        for(int i=0;i<keywords.size();i++){
+            List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
+            for(int j=0;j<list1.size();j++){
+                User cur_user = list1.get(j);
+                List<ObjectId> followlist = search_user.getFollows();
+                Boolean flag = false;
+                for(int ii=0;ii<followlist.size();ii++){
+                    ObjectId user_follow =  followlist.get(ii);
+                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+                    if(Objects.equals(cur_user.getId(), user_follow))
+                        flag = true;
+                }
+
+                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
+                if(!list.contains(searchbody) && !Objects.equals(cur_user.getId(), search_user.getId())){
+                    list.add(searchbody);
+               }
+            }
+        }
         System.out.println(list.size());
         ResponseEntity response = new ResponseEntity<>(list,HttpStatus.OK);
         return response;

@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
         User user = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
-        user.setPosts(postService.getPostsByUser(user));
+        //user.setPosts(postService.getPostsByUser(user));
         return user;
     }
 
@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
         query.addCriteria(Criteria.where("username").is(targetUserName));
 
         Update update1 = new Update();
-        update1.addToSet("followees",currentUser);
+        update1.addToSet("followees",currentUser.getId());
 
         mongoTemplate.updateFirst(query, update1, User.class);
 
@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
         query1.addCriteria(Criteria.where("username").is(currentUserName));
 
         Update update2 = new Update();
-        update2.addToSet("follows",targetUser);
+        update2.addToSet("follows",targetUser.getId());
 
         mongoTemplate.updateFirst(query1, update2, User.class);
 
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
         query.addCriteria(Criteria.where("username").is(targetUserName));
 
         Update update1 = new Update();
-        update1.pull("followees",currentUser);
+        update1.pull("followees",currentUser.getId());
 
         mongoTemplate.updateFirst(query, update1, User.class);
 
@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
         query1.addCriteria(Criteria.where("username").is(currentUserName));
 
         Update update2 = new Update();
-        update2.pull("follows",targetUser);
+        update2.pull("follows",targetUser.getId());
 
         mongoTemplate.updateFirst(query1, update2, User.class);
 
