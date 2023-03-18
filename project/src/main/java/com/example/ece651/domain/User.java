@@ -34,13 +34,10 @@ public class User {
     private String is_blocked;
     private String time_created;
     private String fullname;
-    @DBRef
     private List<ObjectId> followees;
-    @DBRef
     private List<ObjectId> followers;
-    @DBRef
+    private List<ObjectId> postIds;
     private List<Post> posts;
-    @DBRef
     private List<Post> saved_posts;
     public User() {
     }

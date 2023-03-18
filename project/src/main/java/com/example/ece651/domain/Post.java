@@ -23,6 +23,9 @@ public class Post {
     private ObjectId oid;
 
     private String id;
+    private String username;
+    @DBRef
+    private Media avatar;
 
     private String type;
     private String caption;
@@ -42,7 +45,9 @@ public class Post {
     public Post() {
     }
 
-    public Post(String caption, List<Media> mediaList) {
+    public Post(String username, Media avatar, String caption, List<Media> mediaList) {
+        this.username = username;
+        this.avatar = avatar;
         this.caption = caption;
         this.mediaList = mediaList;
         this.oid = new ObjectId();

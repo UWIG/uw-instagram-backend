@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -24,6 +25,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private PostService postService;
 
     private static final String COLLECTION_NAME = "user";
 
@@ -94,11 +98,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> FindUserByUsername(String username) {
+    public User FindUserByUsername(String username) {
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
-        List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
-        return documentList;
+        User user = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
+        user.setPosts(postService.getPostsByUser(user));
+        return user;
     }
 
 

@@ -2,8 +2,10 @@ package com.example.ece651.controller;
 
 import com.example.ece651.domain.Comment;
 import com.example.ece651.domain.Post;
+import com.example.ece651.domain.User;
 import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
+import com.example.ece651.service.UserServiceImpl;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,9 @@ import java.util.*;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private UserServiceImpl userService;
     @Autowired
     private MediaService mediaService;
     @GetMapping
@@ -33,7 +38,8 @@ public class PostController {
     @GetMapping("/{username}")
     public ResponseEntity<List<Post>> getPosts(@PathVariable String username){
         System.out.println(username);
-        List<Post> posts = postService.getPostsByUsername(username);
+        User user = userService.FindUserByUsername(username);
+        List<Post> posts = postService.getPostsByUser(user);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
@@ -48,13 +54,15 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Map<String,String> payload){
-        return new ResponseEntity<>(postService.updatePostByComment(payload.get("comment"),payload.get("id")),HttpStatus.CREATED);
+        User user = userService.FindUserByUsername(payload.get("username"));
+        return new ResponseEntity<>(postService.updatePostByComment(user,payload.get("comment"),payload.get("id")),HttpStatus.CREATED);
     }
 
     @PostMapping("/{username}")
     public ResponseEntity<Post> createPost(@PathVariable String username, @RequestParam("media") MultipartFile[] media,
-                                           @RequestParam("caption") String caption,@RequestParam("avatar") String avatar ) throws IOException {
+                                           @RequestParam("caption") String caption ) throws IOException {
         System.out.println(username);
-        return new ResponseEntity<>(postService.newPost(username, caption, avatar, media),HttpStatus.CREATED);
+        User user = userService.FindUserByUsername(username);
+        return new ResponseEntity<>(postService.newPost(user, caption, media),HttpStatus.CREATED);
     }
 }

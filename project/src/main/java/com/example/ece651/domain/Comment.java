@@ -22,6 +22,10 @@ public class Comment {
 
     @MongoId
     private ObjectId id;
+
+    private String username;
+    @DBRef
+    private Media avatar;
     private String comment;
     private Date time_created;
     @DBRef
@@ -32,7 +36,9 @@ public class Comment {
     public Comment(){
     }
 
-    public Comment(String comment) {
+    public Comment(String username, Media avatar, String comment) {
+        this.username = username;
+        this.avatar = avatar;
         this.comment = comment;
         this.id = new ObjectId();
         this.time_created = new Date();

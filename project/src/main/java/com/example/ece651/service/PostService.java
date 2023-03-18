@@ -24,34 +24,28 @@ public class PostService {
     @Resource
     private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private UserServiceImpl userService;
 
     public List<Post> allPosts(){
         return mongoTemplate.findAll(Post.class,"post");
     }
 
-    public List<Post> getPostsByUsername(String username){
-        User user = userService.FindUserByUsername(username).get(0);
-        System.out.println(user);
-        //user.getPosts();
-        return user.getPosts();
-    }
-
-    public List<Post> getPostsByUserId(String id){
-        ObjectId id_transfer = new ObjectId(id);
-        User user = userService.FindUserByUserId(id_transfer);
-        //user.getPosts();
-        return user.getPosts();
+    public List<Post> getPostsByUser(User user){
+        List<Post> posts = new ArrayList<Post>();
+        if(user.getPostIds() != null){
+            for(ObjectId id: user.getPostIds()){
+                posts.add(mongoTemplate.findById(id, Post.class,"post"));
+            }
+        }
+        return posts;
     }
 
 //    public Optional<Post> singlePost(String username){
 //        return postRepository.findPostByUsername(username);
 //    }
 
-    public Comment updatePostByComment(String comment, String id){
+    public Comment updatePostByComment(User user, String comment, String id){
         ObjectId postId = new ObjectId(id);
-        Comment newComment = new Comment(comment);
+        Comment newComment = new Comment(user.getUsername(),user.getAvatar(),comment);
         mongoTemplate.insert(newComment,"comment");
         mongoTemplate.update(Post.class).matching(Criteria.where("_id").is(id))
                 .apply(new Update().push("comments").value(newComment.getId()))
@@ -59,14 +53,14 @@ public class PostService {
         return newComment;
     }
 
-    public Post newPost(String username, String caption, String avatar, MultipartFile[] media) throws IOException {
+    public Post newPost(User user, String caption, MultipartFile[] media) throws IOException {
         List<Media> mediaList = mediaService.createMediaList(media);
-        Post post = new Post(caption,mediaList);
+        Post post = new Post(user.getUsername(), user.getAvatar(),caption,mediaList);
         mongoTemplate.insertAll(mediaList);
         mongoTemplate.insert(post,"post");
         //change the logic to id afterwards. Currently use username.
-        mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
-                .apply(new Update().push("posts").value(post.getOid()))
+        mongoTemplate.update(User.class).matching(Criteria.where("username").is(user.getUsername()))
+                .apply(new Update().push("postIds").value(post.getOid()))
                 .first();
         return post;
     }

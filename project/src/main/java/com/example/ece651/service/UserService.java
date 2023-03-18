@@ -15,7 +15,7 @@ public interface UserService {
     User UpdateUserByUsername(String id, String Username);
     Media UpdateUserByAvatar(String username, MultipartFile avatar) throws IOException;
     User AddUser(User user);
-    List<User> FindUserByUsername(String username);
+    User FindUserByUsername(String username);
     List<User> FindUserByEmail(String email);
     List<User> FindUserBykeyword(String keyword);
     User FindUserByUserId(ObjectId id);

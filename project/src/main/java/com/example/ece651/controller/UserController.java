@@ -4,6 +4,7 @@ package com.example.ece651.controller;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Post;
 import com.example.ece651.domain.User;
+import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,9 @@ import com.example.ece651.util.ResponseFormat;
 public class UserController {
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private PostService postService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
@@ -38,8 +43,8 @@ public class UserController {
             return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
         }
 
-        List<User> userlist1 = userService.FindUserByUsername(username);
-        if(userlist1.size() != 0){
+        User current_user = userService.FindUserByUsername(username);
+        if(current_user != null){
             System.out.println("Duplicate Username");
             return new ResponseEntity<>("username duplicate", HttpStatus.UNAUTHORIZED);
         }
@@ -64,15 +69,14 @@ public class UserController {
         if (username == null || password == null) {
 //            return new ResponseEntity<>("Error NUll value", HttpStatus.UNAUTHORIZED);
         }
-        List<User> userlist = userService.FindUserByUsername(username);
-        for(int i=0;i<userlist.size();i++){
-            User current_user = userlist.get(i);
-            String cur_username = current_user.getUsername();
-            String cur_password = current_user.getPassword();
-            //System.out.println(password);
-            //System.out.println(cur_username+" "+cur_password);
+        User cur_user = userService.FindUserByUsername(username);
+//        for(int i=0;i<userlist.size();i++){
+//            User current_user = userlist.get(i);
+        if(cur_user != null){
+            String cur_username = cur_user.getUsername();
+            String cur_password = cur_user.getPassword();
             if (cur_password.equals(password)){
-                return new ResponseEntity<>(current_user, HttpStatus.OK);
+                return new ResponseEntity<>(cur_user, HttpStatus.OK);
             }
         }
 
@@ -129,7 +133,7 @@ public class UserController {
     @GetMapping("/{username}")
     public ResponseEntity<User> getUser(@PathVariable String username) throws IOException {
         System.out.println(username);
-        User user = userService.FindUserByUsername(username).get(0);
+        User user = userService.FindUserByUsername(username);
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
