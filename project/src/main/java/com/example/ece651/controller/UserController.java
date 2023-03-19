@@ -113,16 +113,20 @@ public class UserController {
         //ObjectMapper objectMapper = new ObjectMapper();
 
         for(int i=0;i<keywords.size();i++){
+            if(keywords.get(i) == "")
+                continue;
             List<User> list1 = userService.FindUserBykeyword(keywords.get(i));
             for(int j=0;j<list1.size();j++){
                 User cur_user = list1.get(j);
                 List<ObjectId> followlist = search_user.getFollows();
                 Boolean flag = false;
-                for(int ii=0;ii<followlist.size();ii++){
-                    ObjectId user_follow =  followlist.get(ii);
-                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
-                    if(Objects.equals(cur_user.getId(), user_follow))
-                        flag = true;
+                if(followlist != null) {
+                    for (int ii = 0; ii < followlist.size(); ii++) {
+                        ObjectId user_follow = followlist.get(ii);
+                        //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+                        if (Objects.equals(cur_user.getId(), user_follow))
+                            flag = true;
+                    }
                 }
 
                 Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
