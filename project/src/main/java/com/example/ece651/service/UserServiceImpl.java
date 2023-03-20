@@ -102,7 +102,6 @@ public class UserServiceImpl implements UserService {
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
         User user = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
-        user.setPosts(postService.getPostsByUser(user));
         return user;
     }
 

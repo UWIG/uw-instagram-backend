@@ -2,15 +2,11 @@ package com.example.ece651.controller;
 
 
 import com.example.ece651.domain.Media;
-import com.example.ece651.domain.Post;
 import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.java.Log;
-import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +33,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
+        System.out.println(user);
         User user1 = new User();
 
         String email = user.get("emailAddress");
@@ -155,6 +152,9 @@ public class UserController {
     public ResponseEntity<User> getUser(@PathVariable String username) throws IOException {
         System.out.println(username);
         User user = userService.FindUserByUsername(username);
+        if(user != null){
+            user.setPosts(postService.getPostsByUser(user));
+        }
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
