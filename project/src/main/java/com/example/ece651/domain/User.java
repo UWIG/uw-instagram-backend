@@ -35,7 +35,7 @@ public class User {
     private String time_created;
     private String fullname;
     private List<ObjectId> followees;
-    private List<ObjectId> followers;
+    private List<ObjectId> follows;
     private List<ObjectId> postIds;
     private List<Post> posts;
     private List<Post> saved_posts;
