@@ -41,7 +41,7 @@ public class PostController {
     }
 
     @GetMapping("/home")
-    public ResponseEntity<List<homebody>> HomepagePosts(@RequestBody Map<String,String> user){
+    public ResponseEntity<List<Post>> HomepagePosts(@RequestBody Map<String,String> user){
         String username = user.get("username");
         User currentUser = userService.FindUserByUsername(username);
         List<ObjectId> followlist = currentUser.getFollows();
@@ -73,7 +73,7 @@ public class PostController {
         List<ObjectId> like_posts = currentUser.getLike_posts();
         List<ObjectId> follow_user_id_list = currentUser.getFollows();
 
-        List<homebody> posts_include_whether_liked= new ArrayList<>();
+        List<Post> posts_include_whether_liked= new ArrayList<>();
         if(like_posts != null) {
             for (int i = 0; i < posts.size(); i++) {
                 Boolean whether_liked = false;
@@ -90,8 +90,10 @@ public class PostController {
                     if (follow_user_id_list.contains(cur_post_owner_id) || cur_post_owner_id.equals(currentUser.getId()))
                         whether_followed = true;
                 }
-                homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
-                posts_include_whether_liked.add(home_post);
+                cur_post.setWhether_followed_post_user(whether_followed);
+                cur_post.setWhether_liked(whether_liked);
+                //homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
+                posts_include_whether_liked.add(cur_post);
             }
         }
         else{
@@ -105,8 +107,10 @@ public class PostController {
                     if (follow_user_id_list.contains(cur_post_owner_id) || cur_post_owner_id.equals(currentUser.getId()))
                         whether_followed = true;
                 }
-                homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
-                posts_include_whether_liked.add(home_post);
+                //homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
+                cur_post.setWhether_followed_post_user(whether_followed);
+                cur_post.setWhether_liked(whether_liked);
+                posts_include_whether_liked.add(cur_post);
             }
         }
         System.out.println(posts_include_whether_liked.size());
