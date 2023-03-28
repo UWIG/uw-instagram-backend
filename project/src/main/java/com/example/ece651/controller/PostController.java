@@ -4,6 +4,7 @@ import com.example.ece651.domain.Comment;
 import com.example.ece651.domain.Post;
 import com.example.ece651.domain.User;
 import com.example.ece651.service.HashtagService;
+import com.example.ece651.domain.homebody;
 import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
@@ -36,6 +37,65 @@ public class PostController {
     public ResponseEntity<List<Post>> getAllPosts(){
         List<Post> posts = postService.allPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+    @GetMapping("/home")
+    public ResponseEntity<List<homebody>> HomepagePosts(@RequestBody Map<String,String> user){
+        String username = user.get("username");
+        User currentUser = userService.FindUserByUsername(username);
+        List<ObjectId> followlist = currentUser.getFollows();
+        List<Post> posts = new ArrayList<>();
+        //First add follow's posts into posts list.
+        if(followlist!=null){
+            for(int j=0;j<followlist.size();j++){
+                User cur_follow = userService.FindUserByUserId(followlist.get(j));
+                List<Post> cur_follow_post_list = postService.getPostsByUser(cur_follow);
+                posts.addAll(cur_follow_post_list);
+            }
+        }
+        //Second add himself's posts into posts list.
+        List<Post> cur_follow_post_list = postService.getPostsByUser(currentUser);
+        posts.addAll(cur_follow_post_list);
+        //if the size<10, add it until 10.
+        if(posts.size()<10){
+            List<Post> AllPosts = postService.allPosts();
+            for(int index=0;index<AllPosts.size();index++){
+                Post cur_post = AllPosts.get(index);
+                if(!posts.contains(cur_post)){
+                    posts.add(cur_post);
+                    if(posts.size()>=10)
+                        break;
+                }
+            }
+        }
+
+        List<ObjectId> like_posts = currentUser.getLike_posts();
+
+        List<homebody> posts_include_whether_liked= new ArrayList<>();
+        if(like_posts != null) {
+            for (int i = 0; i < posts.size(); i++) {
+                Boolean whether_liked = false;
+                Post cur_post = posts.get(i);
+                for(int index=0;index<like_posts.size();index++){
+                    if(Objects.equals(like_posts.get(index),cur_post.getOid())){
+                        whether_liked = true;
+                    }
+                }
+                homebody home_post = new homebody(cur_post,whether_liked);
+                posts_include_whether_liked.add(home_post);
+            }
+        }
+        else{
+            for (int i = 0; i < posts.size(); i++) {
+                Boolean whether_liked = false;
+                Post cur_post = posts.get(i);
+                homebody home_post = new homebody(cur_post,whether_liked);
+                posts_include_whether_liked.add(home_post);
+            }
+        }
+        System.out.println(posts_include_whether_liked.size());
+        ResponseEntity response = new ResponseEntity<>(posts_include_whether_liked,HttpStatus.OK);
+        return response;
     }
 
     @GetMapping("/{username}")
