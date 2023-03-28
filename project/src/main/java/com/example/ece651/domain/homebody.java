@@ -5,9 +5,20 @@ import java.util.Objects;
 public class homebody {
     private Post post;
     private Boolean whether_liked;
-    public homebody(Post post, Boolean whether_liked){
+    private Boolean whether_followed_post_user;
+
+    public Boolean getWhether_followed_post_user() {
+        return whether_followed_post_user;
+    }
+
+    public void setWhether_followed_post_user(Boolean whether_followed_post_user) {
+        this.whether_followed_post_user = whether_followed_post_user;
+    }
+
+    public homebody(Post post, Boolean whether_liked, Boolean whether_followed_post_user){
         this.post = post;
         this.whether_liked = whether_liked;
+        this.whether_followed_post_user = whether_followed_post_user;
     }
 
     public Post getPost() {
