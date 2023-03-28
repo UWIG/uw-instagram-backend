@@ -37,6 +37,15 @@ public class PostService {
         return post;
     }
 
+    public Post FindPostByOid(ObjectId id) {
+        Criteria criteria = Criteria.where("_id").is(id);
+        Query query = new Query(criteria);
+        Post post = mongoTemplate.findOne(query, Post.class, COLLECTION_NAME);
+        return post;
+    }
+
+
+
 
     public List<Post> allPosts(){
         return mongoTemplate.findAll(Post.class,"post");
@@ -84,6 +93,13 @@ public class PostService {
         return post;
     }
 
+    public List<Post> savedPosts(User user) throws IOException{
+        List<Post> posts = new ArrayList<>();
+        for(ObjectId id: user.getSaved_posts()){
+            posts.add(FindPostByOid(id));
+        }
+        return posts;
+    }
 
     public String AddLike(String user_id, String post_id) {
 

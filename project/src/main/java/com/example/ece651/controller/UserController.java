@@ -1,6 +1,6 @@
 package com.example.ece651.controller;
 
-
+import com.example.ece651.domain.Post;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
@@ -192,6 +192,21 @@ public class UserController {
         return response1;
     }
 
+    @PostMapping("/api/save")
+    public ResponseEntity<String> addSave(@RequestBody Map<String,String> body){
+        String username = body.get("username");
+        String post_id = body.get("post_id");
+        Boolean saved =  Boolean.parseBoolean(body.get("save"));
+        System.out.println(username+" "+post_id+" "+saved);
+        if(saved) userService.savePost(username,post_id);
+        else userService.cancelSavePost(username,post_id);
+        return new ResponseEntity<>("success",HttpStatus.OK);
+    }
 
+    @GetMapping("/api/save/{username}")
+    public ResponseEntity<List<Post>> getSavedPosts(@PathVariable String username) throws IOException{
+        User user = userService.FindUserByUsername(username);
+        return new ResponseEntity<>(postService.savedPosts(user),HttpStatus.OK);
+    }
 
 }

@@ -22,6 +22,8 @@ public interface UserService {
     Media FindAvatarByUsername(String username);
     String AddUserFollowList(String currentUserName, String targetUserName);
     String DeleteUserFollowList(String currentUserName, String targetUserName);
+    void savePost(String username, String postId);
+    void cancelSavePost(String username, String postId);
     void DeleteUser(User user);
 
 }

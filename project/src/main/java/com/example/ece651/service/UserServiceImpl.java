@@ -1,5 +1,6 @@
 package com.example.ece651.service;
 
+import com.example.ece651.domain.Comment;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.User;
 import com.mongodb.client.result.UpdateResult;
@@ -199,5 +200,17 @@ public class UserServiceImpl implements UserService {
         List<User> resultList = mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
     }
 
-
+    @Override
+    public void savePost(String username, String postId){
+        ObjectId id = new ObjectId(postId);
+        mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
+                .apply(new Update().push("saved_posts").value(id))
+                .first();
+    }
+    @Override
+    public void cancelSavePost(String username, String postId){
+        ObjectId id = new ObjectId(postId);
+        mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
+                .apply(new Update().pull("saved_posts",id)).first();
+    }
 }

@@ -7,7 +7,6 @@ import com.example.ece651.service.HashtagService;
 import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
