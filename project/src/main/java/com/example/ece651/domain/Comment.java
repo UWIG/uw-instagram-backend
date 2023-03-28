@@ -29,7 +29,7 @@ public class Comment {
     private String comment;
     private Date time_created;
     @DBRef
-    private List<Object> likes;
+    private List<ObjectId> likes;
     @DBRef
     private List<String> replies;
 

@@ -65,4 +65,6 @@ public class PostController {
         User user = userService.FindUserByUsername(username);
         return new ResponseEntity<>(postService.newPost(user, caption, media),HttpStatus.CREATED);
     }
+
+
 }

@@ -36,8 +36,8 @@ public class Post {
     @DBRef
     private List<Media> mediaList;
 
-    @DBRef
-    private List<Object> likes;
+
+    private List<ObjectId> likes;
 
     @DBRef
     private List<Comment> comments;
