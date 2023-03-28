@@ -8,6 +8,7 @@ import com.example.ece651.domain.homebody;
 import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserServiceImpl;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +40,8 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    @GetMapping("/home")
-    public ResponseEntity<List<homebody>> HomepagePosts(@RequestBody Map<String,String> user){
-        String username = user.get("username");
+    @GetMapping("/home/{username}")
+    public ResponseEntity<List<homebody>> HomepagePosts(@PathVariable String username){
         User currentUser = userService.FindUserByUsername(username);
         List<ObjectId> followlist = currentUser.getFollows();
         List<Post> posts = new ArrayList<>();
