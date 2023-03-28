@@ -177,6 +177,21 @@ public class UserController {
         return response1;
     }
 
+    @PostMapping("/api/likes")
+    public ResponseEntity<String> addLike(@RequestBody Map<String,Object> body){
+        String user_id = body.get("id").toString();
+        String post_id = body.get("post_id").toString();
+        Boolean whether_like = Boolean.parseBoolean(body.get("like").toString());
+        System.out.println(user_id+" "+post_id+" "+whether_like);
+        String response;
+        if(whether_like == true)
+            response = postService.AddLike(user_id,post_id);
+        else
+            response = postService.DeleteLike(user_id,post_id);
+        ResponseEntity response1 = new ResponseEntity<>(response,HttpStatus.OK);
+        return response1;
+    }
+
 
 
 }

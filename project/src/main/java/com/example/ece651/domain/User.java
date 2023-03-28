@@ -38,7 +38,9 @@ public class User {
     private List<ObjectId> follows;
     private List<ObjectId> postIds;
     private List<Post> posts;
-    private List<Post> saved_posts;
+    private List<ObjectId> saved_posts;
+    private List<ObjectId> like_posts;
+    private List<ObjectId> like_comments;
     public User() {
     }
 }

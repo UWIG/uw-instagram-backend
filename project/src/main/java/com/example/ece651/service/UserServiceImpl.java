@@ -198,4 +198,6 @@ public class UserServiceImpl implements UserService {
         Query query = new Query(criteria);
         List<User> resultList = mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
     }
+
+
 }

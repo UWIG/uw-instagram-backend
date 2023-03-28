@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,8 +22,20 @@ public class PostService {
     @Autowired
     private MediaService mediaService;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     @Resource
     private MongoTemplate mongoTemplate;
+
+    private static final String COLLECTION_NAME = "post";
+
+    public Post FindPostById(String id) {
+        Criteria criteria = Criteria.where("id").is(id);
+        Query query = new Query(criteria);
+        Post post = mongoTemplate.findOne(query, Post.class, COLLECTION_NAME);
+        return post;
+    }
 
 
     public List<Post> allPosts(){
@@ -69,6 +82,62 @@ public class PostService {
                 .apply(new Update().push("postIds").value(post.getOid()))
                 .first();
         return post;
+    }
+
+
+    public String AddLike(String user_id, String post_id) {
+
+        ObjectId user_object_id = new ObjectId(user_id);
+        ObjectId post_object_id = new ObjectId(post_id);
+        //User targetUser = userService.FindUserByUserId(user_object_id);
+        //Post targetPost = FindPostById(post_id);
+
+        //Add user_id into post's likes list
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(post_object_id));
+
+        Update update1 = new Update();
+        update1.addToSet("likes",user_object_id);
+
+        mongoTemplate.updateFirst(query, update1, Post.class);
+
+        //Add post_id into curr_user's post_like list
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("id").is(user_object_id));
+
+        Update update2 = new Update();
+        update2.addToSet("like_posts",post_object_id);
+
+        mongoTemplate.updateFirst(query1, update2, User.class);
+
+        return "successful";
+    }
+
+    public String DeleteLike(String user_id, String post_id) {
+        ObjectId user_object_id = new ObjectId(user_id);
+        ObjectId post_object_id = new ObjectId(post_id);
+        User targetUser = userService.FindUserByUserId(user_object_id);
+        Post targetPost = FindPostById(post_id);
+
+        //Delete user_id into post's likes list
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(post_object_id));
+
+        Update update1 = new Update();
+        update1.pull("likes",user_object_id);
+
+        mongoTemplate.updateFirst(query, update1, Post.class);
+
+        //Delete post_id into curr_user's like_post list
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("id").is(user_object_id));
+
+        Update update2 = new Update();
+        update2.pull("like_posts",post_object_id);
+
+        mongoTemplate.updateFirst(query1, update2, User.class);
+
+        return "successful";
     }
 
 }

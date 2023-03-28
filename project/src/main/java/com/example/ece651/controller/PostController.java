@@ -79,4 +79,6 @@ public class PostController {
         if(!hashtags.equals("")) hashtagService.addHashtags(hashtags, post);
         return new ResponseEntity<>(post,HttpStatus.CREATED);
     }
+
+
 }
