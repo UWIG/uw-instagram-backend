@@ -5,6 +5,7 @@ import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
 import com.example.ece651.service.PostService;
+import com.example.ece651.service.UserService;
 import com.example.ece651.service.UserServiceImpl;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,10 +180,12 @@ public class UserController {
 
     @PostMapping("/api/likes")
     public ResponseEntity<String> addLike(@RequestBody Map<String,Object> body){
-        String user_id = body.get("id").toString();
+        String username = body.get("username").toString();
         String post_id = body.get("post_id").toString();
         Boolean whether_like = Boolean.parseBoolean(body.get("like").toString());
-        System.out.println(user_id+" "+post_id+" "+whether_like);
+        System.out.println(username+" "+post_id+" "+whether_like);
+        User cur_user = userService.FindUserByUsername(username);
+        String user_id = cur_user.getId().toHexString();
         String response;
         if(whether_like == true)
             response = postService.AddLike(user_id,post_id);
