@@ -21,7 +21,9 @@ import java.util.List;
 public class Comment {
 
     @MongoId
-    private ObjectId id;
+    private ObjectId oid;
+
+    private String id;
 
     private String username;
     @DBRef
@@ -31,7 +33,7 @@ public class Comment {
     @DBRef
     private List<Object> likes;
     @DBRef
-    private List<String> replies;
+    private List<Comment> replies;
 
     public Comment(){
     }
@@ -40,7 +42,8 @@ public class Comment {
         this.username = username;
         this.avatar = avatar;
         this.comment = comment;
-        this.id = new ObjectId();
+        this.oid = new ObjectId();
+        this.id = this.oid.toHexString();
         this.time_created = new Date();
     }
 }
