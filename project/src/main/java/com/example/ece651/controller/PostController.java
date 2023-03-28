@@ -3,6 +3,7 @@ package com.example.ece651.controller;
 import com.example.ece651.domain.Comment;
 import com.example.ece651.domain.Post;
 import com.example.ece651.domain.User;
+import com.example.ece651.service.HashtagService;
 import com.example.ece651.domain.homebody;
 import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
@@ -25,6 +26,9 @@ import java.util.*;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private HashtagService hashtagService;
 
     @Autowired
     private UserServiceImpl userService;
@@ -115,15 +119,25 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Map<String,String> payload){
         User user = userService.FindUserByUsername(payload.get("username"));
-        return new ResponseEntity<>(postService.updatePostByComment(user,payload.get("comment"),payload.get("id")),HttpStatus.CREATED);
+        String comment = payload.get("comment");
+        String postId = payload.get("id");
+        String commentId = payload.get("commentId");
+        boolean reply = payload.get("reply").length() > 0;
+        if(reply){
+            return new ResponseEntity<>(postService.updateCommentByComment(user,comment, commentId),HttpStatus.CREATED);
+        }else{
+            return new ResponseEntity<>(postService.updatePostByComment(user,comment,postId),HttpStatus.CREATED);
+        }
     }
 
     @PostMapping("/{username}")
     public ResponseEntity<Post> createPost(@PathVariable String username, @RequestParam("media") MultipartFile[] media,
-                                           @RequestParam("caption") String caption ) throws IOException {
+                                           @RequestParam("caption") String caption, @RequestParam("hashtags") String hashtags) throws IOException {
         System.out.println(username);
         User user = userService.FindUserByUsername(username);
-        return new ResponseEntity<>(postService.newPost(user, caption, media),HttpStatus.CREATED);
+        Post post = postService.newPost(user, caption, media);
+        if(!hashtags.equals("")) hashtagService.addHashtags(hashtags, post);
+        return new ResponseEntity<>(post,HttpStatus.CREATED);
     }
 
 

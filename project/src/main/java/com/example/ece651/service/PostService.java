@@ -52,16 +52,22 @@ public class PostService {
         return posts;
     }
 
-//    public Optional<Post> singlePost(String username){
-//        return postRepository.findPostByUsername(username);
-//    }
+    public Comment updateCommentByComment(User user, String comment, String id){
+        ObjectId commentId = new ObjectId(id);
+        Comment newComment = new Comment(user.getUsername(),user.getAvatar(),comment);
+        mongoTemplate.insert(newComment,"comment");
+        mongoTemplate.update(Comment.class).matching(Criteria.where("_id").is(commentId))
+                .apply(new Update().push("replies").value(newComment.getOid()))
+                .first();
+        return newComment;
+    }
 
     public Comment updatePostByComment(User user, String comment, String id){
         ObjectId postId = new ObjectId(id);
         Comment newComment = new Comment(user.getUsername(),user.getAvatar(),comment);
         mongoTemplate.insert(newComment,"comment");
-        mongoTemplate.update(Post.class).matching(Criteria.where("_id").is(id))
-                .apply(new Update().push("comments").value(newComment.getId()))
+        mongoTemplate.update(Post.class).matching(Criteria.where("_id").is(postId))
+                .apply(new Update().push("comments").value(newComment.getOid()))
                 .first();
         return newComment;
     }
