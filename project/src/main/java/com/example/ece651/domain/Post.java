@@ -42,6 +42,10 @@ public class Post {
     @DBRef
     private List<Comment> comments;
 
+    private Boolean whether_liked;
+    private Boolean whether_saved;
+    private Boolean whether_followed_post_user;
+
     public Post() {
     }
 
@@ -54,6 +58,8 @@ public class Post {
         this.id = this.oid.toHexString();
         this.time_created = new Date();
         this.time_modified = new Date();
+        this.whether_liked = false;
+        this.whether_followed_post_user = false;
     }
 
 

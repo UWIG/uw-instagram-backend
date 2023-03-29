@@ -41,7 +41,7 @@ public class PostController {
     }
 
     @GetMapping("/home/{username}")
-    public ResponseEntity<List<homebody>> HomepagePosts(@PathVariable String username){
+    public ResponseEntity<List<Post>> HomepagePosts(@PathVariable String username){
         User currentUser = userService.FindUserByUsername(username);
         List<ObjectId> followlist = currentUser.getFollows();
         List<Post> posts = new ArrayList<>();
@@ -70,27 +70,56 @@ public class PostController {
         }
 
         List<ObjectId> like_posts = currentUser.getLike_posts();
+        List<ObjectId> follow_user_id_list = currentUser.getFollows();
+        List<ObjectId> saved_posts = currentUser.getSaved_posts();
 
-        List<homebody> posts_include_whether_liked= new ArrayList<>();
+        List<Post> posts_include_whether_liked= new ArrayList<>();
         if(like_posts != null) {
             for (int i = 0; i < posts.size(); i++) {
                 Boolean whether_liked = false;
+                Boolean whether_followed = false;
+                Boolean whether_saved = false;
                 Post cur_post = posts.get(i);
+                ObjectId cur_post_owner_id = userService.FindUserByUsername(cur_post.getUsername()).getId();
+
                 for(int index=0;index<like_posts.size();index++){
                     if(Objects.equals(like_posts.get(index),cur_post.getOid())){
                         whether_liked = true;
                     }
                 }
-                homebody home_post = new homebody(cur_post,whether_liked);
-                posts_include_whether_liked.add(home_post);
+
+                if(follow_user_id_list!= null){
+                    if (follow_user_id_list.contains(cur_post_owner_id) || cur_post_owner_id.equals(currentUser.getId()))
+                        whether_followed = true;
+                }
+
+                for(int index=0;index<saved_posts.size();index++){
+                    if(Objects.equals(saved_posts.get(index),cur_post.getOid())){
+                        whether_saved = true;
+                    }
+                }
+                cur_post.setWhether_followed_post_user(whether_followed);
+                cur_post.setWhether_liked(whether_liked);
+                cur_post.setWhether_saved(whether_saved);
+                //homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
+                posts_include_whether_liked.add(cur_post);
             }
         }
         else{
             for (int i = 0; i < posts.size(); i++) {
                 Boolean whether_liked = false;
                 Post cur_post = posts.get(i);
-                homebody home_post = new homebody(cur_post,whether_liked);
-                posts_include_whether_liked.add(home_post);
+
+                ObjectId cur_post_owner_id = userService.FindUserByUsername(cur_post.getUsername()).getId();
+                Boolean whether_followed = false;
+                if(follow_user_id_list!= null){
+                    if (follow_user_id_list.contains(cur_post_owner_id) || cur_post_owner_id.equals(currentUser.getId()))
+                        whether_followed = true;
+                }
+                //homebody home_post = new homebody(cur_post,whether_liked,whether_followed);
+                cur_post.setWhether_followed_post_user(whether_followed);
+                cur_post.setWhether_liked(whether_liked);
+                posts_include_whether_liked.add(cur_post);
             }
         }
         System.out.println(posts_include_whether_liked.size());
