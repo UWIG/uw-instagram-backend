@@ -1,0 +1,63 @@
+package com.example.ece651.controller;
+
+
+import com.example.ece651.domain.Comment;
+import com.example.ece651.domain.Notification;
+import com.example.ece651.domain.User;
+import com.example.ece651.service.NotificationService;
+import com.example.ece651.service.PostService;
+import jakarta.annotation.Resource;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api/notification")
+public class NotificationController {
+    @Autowired
+    private NotificationService notificationService;
+
+    @GetMapping("/{username}")
+    public ResponseEntity<Notification> getNotifications(@PathVariable String username) throws IOException {
+        System.out.println(username);
+        List<Notification> notifications = notificationService.getNotificationsByUsername(username);
+        ResponseEntity response= new ResponseEntity<>(notifications, HttpStatus.OK);
+        return response;
+    }
+
+    @PostMapping("/add/follow")
+    public ResponseEntity<Notification> createNotification_follow(@RequestBody Map<String,String> user){
+        String username_from = user.get("username_from");
+        String username_to = user.get("username_to");
+        Notification notification = notificationService.addNotification_follow(username_from,username_to);
+        ResponseEntity response= new ResponseEntity<>(notification, HttpStatus.OK);
+        return response;
+    }
+
+    @PostMapping("/add/comment")
+    public ResponseEntity<Notification> createNotification_comment(@RequestBody Map<String,String> user){
+        String username_from = user.get("username_from");
+        String username_to = user.get("username_to");
+        ObjectId id = new ObjectId(user.get("postId"));
+        String comment = user.get("comment");
+        Notification notification = notificationService.addNotification_comment(username_from,username_to,id,comment);
+        ResponseEntity response= new ResponseEntity<>(notification, HttpStatus.OK);
+        return response;
+    }
+
+    @PostMapping("/change")
+    public ResponseEntity<String> ChangeStatus(@RequestBody Map<String,String> user){
+        ObjectId id = new ObjectId(user.get("notificationId"));
+        String response1 = notificationService.changeReadStatus(id);
+        ResponseEntity response= new ResponseEntity<>(response1, HttpStatus.OK);
+        return response;
+    }
+
+}
