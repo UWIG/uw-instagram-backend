@@ -24,6 +24,7 @@ public interface UserService {
     void savePost(String username, String postId);
     void cancelSavePost(String username, String postId);
     void DeleteUser(User user);
+    void updateUserProfile(String originUsername, String fullname, String username, String email, String phone, String gender);
 
     void setFollowers(User user);
 

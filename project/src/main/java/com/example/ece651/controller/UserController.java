@@ -224,4 +224,17 @@ public class UserController {
         return new ResponseEntity<>(postService.savedPosts(user),HttpStatus.OK);
     }
 
+
+    @PostMapping("/user/update/{originUsername}")
+    public ResponseEntity<ResponseFormat> updateUser(@PathVariable String originUsername, @RequestParam("fullname") String fullname, @RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("phone") String phone, @RequestParam("gender") String gender) throws IOException {
+        System.out.println(originUsername);
+        System.out.println(fullname);
+        System.out.println(username);
+        System.out.println(email);
+        System.out.println(phone);
+        System.out.println(gender);
+        userService.updateUserProfile(originUsername, fullname, username, email, phone, gender);
+        ResponseFormat responseFormat = new ResponseFormat("",1,"success");
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
 }
