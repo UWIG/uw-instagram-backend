@@ -53,10 +53,14 @@ public class NotificationController {
     }
 
     @PostMapping("/change")
-    public ResponseEntity<String> ChangeStatus(@RequestBody Map<String,String> user){
-        ObjectId id = new ObjectId(user.get("notificationId"));
-        String response1 = notificationService.changeReadStatus(id);
-        ResponseEntity response= new ResponseEntity<>(response1, HttpStatus.OK);
+    public ResponseEntity<String> ChangeStatus(@RequestBody Map<String,List<String>> user){
+        //ObjectId id = new ObjectId(user.get("notificationId"));
+        List<String> id_list = user.get("notificationId");
+        for(int index = 0;index<id_list.size();index++) {
+            String id = id_list.get(index);
+            notificationService.changeReadStatus(id);
+        }
+        ResponseEntity response= new ResponseEntity<>("success", HttpStatus.OK);
         return response;
     }
 

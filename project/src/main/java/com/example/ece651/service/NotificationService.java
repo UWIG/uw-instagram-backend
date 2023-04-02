@@ -45,10 +45,10 @@ public class NotificationService {
         return mongoTemplate.insert(new_notification, COLLECTION_NAME);
     }
 
-    public String changeReadStatus(ObjectId id){
+    public String changeReadStatus(String id){
         Update update = new Update();
         update.set("whether_read",true);
-        Criteria criteria = Criteria.where("id").is(id);
+        Criteria criteria = Criteria.where("idString").is(id);
         Query query = new Query(criteria);
         mongoTemplate.updateFirst(query,update,Notification.class);
         return "change status success";

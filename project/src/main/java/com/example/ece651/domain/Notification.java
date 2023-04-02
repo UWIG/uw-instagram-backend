@@ -18,6 +18,7 @@ import java.util.Date;
 public class Notification {
     @MongoId
     private ObjectId id;
+    private String idString;
     private Date time_created;
     private String username_from;
     private String username_to;
@@ -35,6 +36,7 @@ public class Notification {
         this.time_created = new Date();
         this.whether_read = false;
         this.username_from = username_from;
+        this.idString = id.toHexString();
     }
     public Notification(){}
 }
