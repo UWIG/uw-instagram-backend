@@ -2,20 +2,33 @@ package com.example.ece651.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "media")
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class Media {
     @Id
     private ObjectId id;
 
-    private Binary data;
+    private String filename;
 
-    public Media(Binary data) {
+    private String type;
+    private byte[] data;
+
+    public Media(String filename) {
         this.id = new ObjectId();
-        this.data = data;
+        this.filename = filename;
     }
+
+    public Media(String filename, String type) {
+        this.id = new ObjectId();
+        this.filename = filename;
+        this.type = type;
+    }
+
 }

@@ -4,6 +4,7 @@ import com.example.ece651.domain.Post;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
+import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserService;
 import com.example.ece651.service.UserServiceImpl;
@@ -30,6 +31,9 @@ public class UserController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private MediaService mediaService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
@@ -78,6 +82,10 @@ public class UserController {
             String cur_username = cur_user.getUsername();
             String cur_password = cur_user.getPassword();
             if (cur_password.equals(password)){
+                if(cur_user.getAvatar() != null){
+                    Media media = cur_user.getAvatar();
+                    media.setData(mediaService.downloadFile(media.getFilename()));
+                }
                 return new ResponseEntity<>(cur_user, HttpStatus.OK);
             }
         }
@@ -106,8 +114,6 @@ public class UserController {
 
         User search_user = userService.FindUserByUsername(username);
 
-        //ObjectMapper objectMapper = new ObjectMapper();
-
         for(int i=0;i<keywords.size();i++){
             if(keywords.get(i) == "")
                 continue;
@@ -124,7 +130,10 @@ public class UserController {
                             flag = true;
                     }
                 }
-
+                if(cur_user.getAvatar() != null){
+                    Media media = cur_user.getAvatar();
+                    media.setData(mediaService.downloadFile(media.getFilename()));
+                }
                 Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
                 if(!list.contains(searchbody) && !Objects.equals(cur_user.getId(), search_user.getId())){
                     list.add(searchbody);
@@ -157,7 +166,10 @@ public class UserController {
         System.out.println(username);
         User user = userService.FindUserByUsername(username);
         if(user != null){
+            userService.updateUserAvatar(user);
             user.setPosts(postService.getPostsByUser(user));
+            userService.setFollowing(user);
+            userService.setFollowers(user);
         }
         return new ResponseEntity<>(user,HttpStatus.OK);
     }

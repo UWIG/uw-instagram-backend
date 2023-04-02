@@ -36,6 +36,8 @@ public class User {
     private String fullname;
     private List<ObjectId> followees;
     private List<ObjectId> follows;
+    private List<Searchbody> followers;
+    private List<Searchbody> following;
     private List<ObjectId> postIds;
     private List<Post> posts;
     private List<ObjectId> saved_posts;

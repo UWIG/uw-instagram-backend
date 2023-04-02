@@ -26,7 +26,7 @@ public class Comment {
     private String id;
 
     private String username;
-    @DBRef
+
     private Media avatar;
     private String comment;
     private Date time_created;
@@ -38,9 +38,8 @@ public class Comment {
     public Comment(){
     }
 
-    public Comment(String username, Media avatar, String comment) {
+    public Comment(String username, String comment) {
         this.username = username;
-        this.avatar = avatar;
         this.comment = comment;
         this.oid = new ObjectId();
         this.id = this.oid.toHexString();

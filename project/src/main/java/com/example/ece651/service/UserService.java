@@ -19,11 +19,18 @@ public interface UserService {
     List<User> FindUserByEmail(String email);
     List<User> FindUserBykeyword(String keyword);
     User FindUserByUserId(ObjectId id);
-    Media FindAvatarByUsername(String username);
     String AddUserFollowList(String currentUserName, String targetUserName);
     String DeleteUserFollowList(String currentUserName, String targetUserName);
     void savePost(String username, String postId);
     void cancelSavePost(String username, String postId);
     void DeleteUser(User user);
+
+    void setFollowers(User user);
+
+    void setFollowing(User user);
+
+    Media FindAvatarByUsername(String username);
+
+    void updateUserAvatar(User user);
 
 }

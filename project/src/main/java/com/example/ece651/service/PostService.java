@@ -1,9 +1,6 @@
 package com.example.ece651.service;
 
-import com.example.ece651.domain.Comment;
-import com.example.ece651.domain.Media;
-import com.example.ece651.domain.Post;
-import com.example.ece651.domain.User;
+import com.example.ece651.domain.*;
 import jakarta.annotation.Resource;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +21,9 @@ public class PostService {
 
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private HashtagService hashtagService;
 
     @Resource
     private MongoTemplate mongoTemplate;
@@ -53,9 +53,13 @@ public class PostService {
 
     public List<Post> getPostsByUser(User user){
         List<Post> posts = new ArrayList<Post>();
+        Media avatar = user.getAvatar();
         if(user.getPostIds() != null){
             for(ObjectId id: user.getPostIds()){
-                posts.add(mongoTemplate.findById(id, Post.class,"post"));
+                Post post = mongoTemplate.findById(id, Post.class,"post");
+                post.setAvatar(avatar);
+                updatePostMedia(post);
+                posts.add(post);
             }
         }
         return posts;
@@ -63,7 +67,7 @@ public class PostService {
 
     public Comment updateCommentByComment(User user, String comment, String id){
         ObjectId commentId = new ObjectId(id);
-        Comment newComment = new Comment(user.getUsername(),user.getAvatar(),comment);
+        Comment newComment = new Comment(user.getUsername(),comment);
         mongoTemplate.insert(newComment,"comment");
         mongoTemplate.update(Comment.class).matching(Criteria.where("_id").is(commentId))
                 .apply(new Update().push("replies").value(newComment.getOid()))
@@ -73,7 +77,7 @@ public class PostService {
 
     public Comment updatePostByComment(User user, String comment, String id){
         ObjectId postId = new ObjectId(id);
-        Comment newComment = new Comment(user.getUsername(),user.getAvatar(),comment);
+        Comment newComment = new Comment(user.getUsername(),comment);
         mongoTemplate.insert(newComment,"comment");
         mongoTemplate.update(Post.class).matching(Criteria.where("_id").is(postId))
                 .apply(new Update().push("comments").value(newComment.getOid()))
@@ -81,9 +85,24 @@ public class PostService {
         return newComment;
     }
 
-    public Post newPost(User user, String caption, MultipartFile[] media) throws IOException {
+    public void deleteComment(Comment comment){
+        if(comment.getReplies() != null){
+            for(Comment reply: comment.getReplies()){
+                deleteComment(reply);
+            }
+        }
+        ObjectId id = comment.getOid();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(id));
+        mongoTemplate.remove(query,Comment.class,"comment");
+    }
+
+    public Post newPost(User user, String caption, MultipartFile[] media, String hashtags) throws IOException {
         List<Media> mediaList = mediaService.createMediaList(media);
-        Post post = new Post(user.getUsername(), user.getAvatar(),caption,mediaList);
+        Post post = new Post(user.getUsername(),caption,mediaList);
+        if(!hashtags.equals("")){
+            hashtagService.addHashtags(hashtags, post);
+        }
         mongoTemplate.insertAll(mediaList);
         mongoTemplate.insert(post,"post");
         //change the logic to id afterwards. Currently use username.
@@ -95,8 +114,13 @@ public class PostService {
 
     public List<Post> savedPosts(User user) throws IOException{
         List<Post> posts = new ArrayList<>();
-        for(ObjectId id: user.getSaved_posts()){
-            posts.add(FindPostByOid(id));
+        if(user.getSaved_posts() != null){
+            for(ObjectId id: user.getSaved_posts()){
+                Post post = FindPostByOid(id);
+                post.setAvatar(userService.FindAvatarByUsername(post.getUsername()));
+                updatePostMedia(post);
+                posts.add(post);
+            }
         }
         return posts;
     }
@@ -156,6 +180,66 @@ public class PostService {
         return "successful";
     }
 
+    public List<Post> getPostsByHashtag(String hashtag){
+        Hashtag tag = hashtagService.getHashtag(hashtag);
+        for(Post post: tag.getPostList()){
+            post.setAvatar(userService.FindAvatarByUsername(post.getUsername()));
+            updatePostMedia(post);
+        }
+        System.out.println(tag.getTag());
+        return tag.getPostList();
+    }
+
+    public void deletePostByPostId(String postId){
+        ObjectId id = new ObjectId(postId);
+        Post post = FindPostByOid(id);
+        System.out.println(post);
+        if(post != null){
+            if(post.getMediaList() != null){
+                for(Media media: post.getMediaList()){
+                    mediaService.deleteFile(media);
+                }
+            }
+            if(post.getComments() != null){
+                for(Comment comment: post.getComments()){
+                    deleteComment(comment);
+                }
+            }
+            if(post.getHashtags() != null){
+                for(String tag: post.getHashtags()){
+                    tag = tag.substring(1);
+                    mongoTemplate.update(Hashtag.class).matching(Criteria.where("tag").is(tag))
+                        .apply(new Update().pull("postList",id)).first();
+                }
+            }
+            mongoTemplate.update(User.class).matching(Criteria.where("username").is(post.getUsername()))
+                    .apply(new Update().pull("postIds",id)).first();
+            mongoTemplate.remove(post);
+        }
+    }
+
+
+    public void updatePostMedia(Post post){
+        if(post.getMediaList() != null){
+            for(Media media: post.getMediaList()){
+                media.setData(mediaService.downloadFile(media.getFilename()));
+            }
+        }
+        if(post.getComments() != null){
+            for(Comment comment: post.getComments()){
+                updateCommentMedia(comment);
+            }
+        }
+    }
+
+    public void updateCommentMedia(Comment comment){
+        comment.setAvatar(userService.FindAvatarByUsername(comment.getUsername()));
+        if(comment.getReplies() != null){
+            for(Comment reply: comment.getReplies()){
+                reply.setAvatar(userService.FindAvatarByUsername(reply.getUsername()));
+            }
+        }
+    }
 }
 
 
