@@ -289,4 +289,19 @@ public class UserServiceImpl implements UserService {
                 .apply(update)
                 .first();
     }
+
+    @Override
+    public Integer changePwd(String username, String oldPwd, String newPwd) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(username));
+        User user = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0);
+        if(user.getPassword().equals(oldPwd)){
+            mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
+                    .apply(new Update().set("password",newPwd))
+                    .first();
+            return 1;
+        }else{
+            return 2;
+        }
+    }
 }

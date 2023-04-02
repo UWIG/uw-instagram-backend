@@ -227,14 +227,21 @@ public class UserController {
 
     @PostMapping("/user/update/{originUsername}")
     public ResponseEntity<ResponseFormat> updateUser(@PathVariable String originUsername, @RequestParam("fullname") String fullname, @RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("phone") String phone, @RequestParam("gender") String gender) throws IOException {
-        System.out.println(originUsername);
-        System.out.println(fullname);
-        System.out.println(username);
-        System.out.println(email);
-        System.out.println(phone);
-        System.out.println(gender);
         userService.updateUserProfile(originUsername, fullname, username, email, phone, gender);
         ResponseFormat responseFormat = new ResponseFormat("",1,"success");
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
+
+    @PostMapping("/user/changePwd/{username}")
+    public ResponseEntity<ResponseFormat> changePwd(@PathVariable String username, @RequestParam("oldPwd") String oldPwd, @RequestParam("newPwd") String newPwd) throws IOException {
+        Integer resultCode = userService.changePwd(username, oldPwd, newPwd);
+        ResponseFormat responseFormat = null;
+        if(resultCode == 1){
+            responseFormat = new ResponseFormat("",1,"success");
+        }
+        else if(resultCode == 2){
+            responseFormat = new ResponseFormat("",2,"fail: the old password is incorrect");
+        }
         return new ResponseEntity<>(responseFormat,HttpStatus.OK);
     }
 }
