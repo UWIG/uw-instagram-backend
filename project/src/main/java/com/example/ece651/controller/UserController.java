@@ -8,6 +8,7 @@ import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserService;
 import com.example.ece651.service.UserServiceImpl;
+import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +40,7 @@ public class UserController {
     private MediaService mediaService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
+    public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         System.out.println(user);
         User user1 = new User();
 
@@ -60,6 +64,8 @@ public class UserController {
             return new ResponseEntity<>("email duplicate", HttpStatus.UNAUTHORIZED);
         }
         //user1.setId(user.get("id"));
+        password = encode_password(password);
+        System.out.println(password);
         user1.setEmail(email);
         user1.setUsername(username);
         user1.setPassword(password);
@@ -69,12 +75,13 @@ public class UserController {
     }
 
     @PostMapping("/login" )
-    public ResponseEntity<User> loginUser(@RequestBody Map<String,String> user){
+    public ResponseEntity<User> loginUser(@RequestBody Map<String,String> user) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         String username = user.get("username");
         String password = user.get("password");
         if (username == null || password == null) {
             return new ResponseEntity<>(new User(), HttpStatus.UNAUTHORIZED);
         }
+        password = encode_password(password);
         User cur_user = userService.FindUserByUsername(username);
 //        for(int i=0;i<userlist.size();i++){
 //            User current_user = userlist.get(i);
@@ -243,5 +250,12 @@ public class UserController {
             responseFormat = new ResponseFormat("",2,"fail: the old password is incorrect");
         }
         return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
+
+    public String encode_password(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(str.getBytes("utf-8"));
+        byte[] digest = md.digest();
+        return String.valueOf(Hex.encodeHex(digest));
     }
 }
