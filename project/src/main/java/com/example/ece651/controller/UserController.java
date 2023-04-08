@@ -82,6 +82,7 @@ public class UserController {
             return new ResponseEntity<>(new User(), HttpStatus.UNAUTHORIZED);
         }
         password = encode_password(password);
+        System.out.println(password);
         User cur_user = userService.FindUserByUsername(username);
 //        for(int i=0;i<userlist.size();i++){
 //            User current_user = userlist.get(i);
@@ -252,6 +253,7 @@ public class UserController {
         return new ResponseEntity<>(responseFormat,HttpStatus.OK);
     }
 
+    //SHA1算法
     public String encode_password(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.update(str.getBytes("utf-8"));

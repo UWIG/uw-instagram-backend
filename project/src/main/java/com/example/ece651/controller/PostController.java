@@ -147,6 +147,22 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
+    @GetMapping("/explore/{username}")
+    public ResponseEntity<List<Post>> getExplorePosts(@PathVariable String username){
+        System.out.println(username);
+        //User user = userService.FindUserByUsername(username);
+        //List<Post> posts = postService.getPostsByUser(user);
+        List<Post> allposts = postService.allPosts();
+        List<Post> posts = new ArrayList<>();
+        for(int index=0; index<allposts.size();index++){
+            Post currentPost = allposts.get(index);
+            if(!currentPost.getUsername().equals(username)){
+                posts.add(currentPost);
+            }
+        }
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
 //    @GetMapping("/{userid}")
 //    public ResponseEntity<List<Post>> getSinglePostByUserId(@PathVariable String userid){
 //        System.out.println(userid);
