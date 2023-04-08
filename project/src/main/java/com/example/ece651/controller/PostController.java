@@ -51,6 +51,7 @@ public class PostController {
         if(followlist!=null){
             for(int j=0;j<followlist.size();j++){
                 User cur_follow = userService.FindUserByUserId(followlist.get(j));
+                userService.updateUserAvatar(cur_follow);
                 List<Post> cur_follow_post_list = postService.getPostsByUser(cur_follow);
                 posts.addAll(cur_follow_post_list);
             }
@@ -77,10 +78,6 @@ public class PostController {
 
         for(Post post: posts){
             ObjectId oid = post.getOid();
-            if(avatar != null){
-                post.setAvatar(avatar);
-            }
-            postService.updatePostMedia(post);
             if(saved_posts != null){
                 for(ObjectId saved_id: saved_posts){
                     if(Objects.equals(saved_id,oid)){
