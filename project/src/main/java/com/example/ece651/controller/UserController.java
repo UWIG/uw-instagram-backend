@@ -115,6 +115,43 @@ public class UserController {
         //return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
     }
 
+
+    @GetMapping("/recommend/{username}")
+    public ResponseEntity<User> recommendFollowUser(@PathVariable String username){
+        List<Searchbody> list = new ArrayList<>();
+
+        //get the userlist that the user has followed
+        User search_user = userService.FindUserByUsername(username);
+        List<ObjectId> followlist = search_user.getFollows();
+
+        List<User> all_users = userService.AllUsers();
+
+        for(int index = 0;index<all_users.size();index++){
+            if (list.size() == 3)
+                break;
+            User cur_user = all_users.get(index);
+            Boolean flag = false;
+            if(followlist != null) {
+                for (int ii = 0; ii < followlist.size(); ii++) {
+                    ObjectId user_follow = followlist.get(ii);
+                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+                    if (Objects.equals(cur_user.getId(), user_follow))
+                        flag = true;
+                }
+            }
+            if(flag == false && !cur_user.getUsername().equals(username)){
+                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
+                list.add(searchbody);
+            }
+
+
+        }
+
+
+        ResponseEntity response = new ResponseEntity<>(list,HttpStatus.OK);
+        return response;
+    }
+
     @PostMapping("/search/{username}")
     public ResponseEntity<User> searchUser(@RequestBody Map<String,List<String>> body,@PathVariable String username){
         List<Searchbody> list = new ArrayList<>();

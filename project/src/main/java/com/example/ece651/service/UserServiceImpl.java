@@ -1,9 +1,6 @@
 package com.example.ece651.service;
 
-import com.example.ece651.domain.Comment;
-import com.example.ece651.domain.Media;
-import com.example.ece651.domain.Searchbody;
-import com.example.ece651.domain.User;
+import com.example.ece651.domain.*;
 import com.example.ece651.util.ResponseFormat;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
@@ -131,6 +128,11 @@ public class UserServiceImpl implements UserService {
         Query query = new Query(Criteria.where("username").regex(pattern));
         List<User> documentList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         return documentList;
+    }
+
+    @Override
+    public List<User> AllUsers() {
+        return mongoTemplate.findAll(User.class,"user");
     }
 
     @Override

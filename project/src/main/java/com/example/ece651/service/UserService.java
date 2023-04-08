@@ -18,6 +18,7 @@ public interface UserService {
     User FindUserByUsername(String username);
     List<User> FindUserByEmail(String email);
     List<User> FindUserBykeyword(String keyword);
+    List<User> AllUsers();
     User FindUserByUserId(ObjectId id);
     String AddUserFollowList(String currentUserName, String targetUserName);
     String DeleteUserFollowList(String currentUserName, String targetUserName);
