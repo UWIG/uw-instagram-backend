@@ -38,7 +38,7 @@ public class PostController {
     }
 
     @GetMapping("/home/{username}")
-    public ResponseEntity<List<Post>> HomepagePosts(@PathVariable String username){
+    public ResponseEntity<Homepage> HomepagePosts(@PathVariable String username){
         User currentUser = userService.FindUserByUsername(username);
         Media avatar = currentUser.getAvatar();
         if(avatar != null){
@@ -135,7 +135,8 @@ public class PostController {
             }
         }
         System.out.println(posts_include_whether_liked.size());
-        ResponseEntity response = new ResponseEntity<>(posts_include_whether_liked,HttpStatus.OK);
+        Homepage homepage = new Homepage(posts_include_whether_liked, get_recommend_follow_list(username));
+        ResponseEntity response = new ResponseEntity<>(homepage,HttpStatus.OK);
         return response;
     }
 
@@ -207,5 +208,37 @@ public class PostController {
         System.out.println(postId);
         postService.deletePostByPostId(postId);
         return new ResponseEntity<>("delete successful", HttpStatus.OK);
+    }
+
+    public List<Searchbody> get_recommend_follow_list(String username){
+        List<Searchbody> list = new ArrayList<>();
+
+        //get the userlist that the user has followed
+        User search_user = userService.FindUserByUsername(username);
+        List<ObjectId> followlist = search_user.getFollows();
+
+        List<User> all_users = userService.AllUsers();
+
+        for(int index = 0;index<all_users.size();index++){
+            if (list.size() == 3)
+                break;
+            User cur_user = all_users.get(index);
+            Boolean flag = false;
+            if(followlist != null) {
+                for (int ii = 0; ii < followlist.size(); ii++) {
+                    ObjectId user_follow = followlist.get(ii);
+                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+                    if (Objects.equals(cur_user.getId(), user_follow))
+                        flag = true;
+                }
+            }
+            if(flag == false && !cur_user.getUsername().equals(username)){
+                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
+                list.add(searchbody);
+            }
+
+
+        }
+        return list;
     }
 }
