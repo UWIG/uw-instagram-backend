@@ -21,7 +21,7 @@ import java.util.Map;
 @CrossOrigin
 @RequestMapping("/api/notification")
 public class NotificationController {
-    @Autowired
+    @Resource
     private NotificationService notificationService;
 
     @GetMapping("/{username}")

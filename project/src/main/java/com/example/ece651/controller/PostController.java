@@ -146,7 +146,7 @@ public class PostController {
 
     @GetMapping("/explore/{username}")
     public ResponseEntity<List<Post>> getExplorePosts(@PathVariable String username){
-        System.out.println(username);
+        System.out.println("explore " + username);
         //User user = userService.FindUserByUsername(username);
         //List<Post> posts = postService.getPostsByUser(user);
         List<Post> allposts = postService.allPosts();
@@ -154,6 +154,7 @@ public class PostController {
         for(int index=0; index<allposts.size();index++){
             Post currentPost = allposts.get(index);
             if(!currentPost.getUsername().equals(username)){
+                postService.updatePostMedia(currentPost);
                 posts.add(currentPost);
             }
         }
