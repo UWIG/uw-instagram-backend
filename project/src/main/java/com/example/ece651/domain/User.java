@@ -41,6 +41,20 @@ public class User {
     private List<ObjectId> saved_posts;
     private List<ObjectId> like_posts;
     private List<ObjectId> like_comments;
+
+    public List<ObjectId> getPostIds() {
+        return postIds;
+    }
+
+    public List<ObjectId> getFollowees() {
+        return followees;
+    }
+
+    public List<ObjectId> getFollows() {
+        return follows;
+    }
+
     public User() {
     }
+
 }

@@ -44,9 +44,6 @@ public class PostService {
         return post;
     }
 
-
-
-
     public List<Post> allPosts(){
         return mongoTemplate.findAll(Post.class,"post");
     }
