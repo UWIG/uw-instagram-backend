@@ -231,6 +231,7 @@ public class PostController {
                 }
             }
             if(flag == false && !cur_user.getUsername().equals(username)){
+                userService.updateUserAvatar(cur_user);
                 Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
                 list.add(searchbody);
             }
