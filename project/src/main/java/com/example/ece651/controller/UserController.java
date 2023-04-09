@@ -4,9 +4,11 @@ import com.example.ece651.domain.Post;
 import com.example.ece651.domain.Media;
 import com.example.ece651.domain.Searchbody;
 import com.example.ece651.domain.User;
+import com.example.ece651.service.MediaService;
 import com.example.ece651.service.PostService;
 import com.example.ece651.service.UserService;
 import com.example.ece651.service.UserServiceImpl;
+import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +36,11 @@ public class UserController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private MediaService mediaService;
+
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user){
+    public ResponseEntity<String> registerUser(@RequestBody Map<String,String> user) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         System.out.println(user);
         User user1 = new User();
 
@@ -56,6 +64,8 @@ public class UserController {
             return new ResponseEntity<>("email duplicate", HttpStatus.UNAUTHORIZED);
         }
         //user1.setId(user.get("id"));
+        password = encode_password(password);
+        System.out.println(password);
         user1.setEmail(email);
         user1.setUsername(username);
         user1.setPassword(password);
@@ -65,12 +75,14 @@ public class UserController {
     }
 
     @PostMapping("/login" )
-    public ResponseEntity<User> loginUser(@RequestBody Map<String,String> user){
+    public ResponseEntity<User> loginUser(@RequestBody Map<String,String> user) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         String username = user.get("username");
         String password = user.get("password");
         if (username == null || password == null) {
             return new ResponseEntity<>(new User(), HttpStatus.UNAUTHORIZED);
         }
+        password = encode_password(password);
+        System.out.println(password);
         User cur_user = userService.FindUserByUsername(username);
 //        for(int i=0;i<userlist.size();i++){
 //            User current_user = userlist.get(i);
@@ -78,6 +90,10 @@ public class UserController {
             String cur_username = cur_user.getUsername();
             String cur_password = cur_user.getPassword();
             if (cur_password.equals(password)){
+                if(cur_user.getAvatar() != null){
+                    Media media = cur_user.getAvatar();
+                    media.setData(mediaService.downloadFile(media.getFilename()));
+                }
                 return new ResponseEntity<>(cur_user, HttpStatus.OK);
             }
         }
@@ -99,14 +115,49 @@ public class UserController {
         //return new ResponseEntity<>("Not found this user in the system", HttpStatus.UNAUTHORIZED);
     }
 
+
+    @GetMapping("/recommend/{username}")
+    public ResponseEntity<User> recommendFollowUser(@PathVariable String username){
+        List<Searchbody> list = new ArrayList<>();
+
+        //get the userlist that the user has followed
+        User search_user = userService.FindUserByUsername(username);
+        List<ObjectId> followlist = search_user.getFollows();
+
+        List<User> all_users = userService.AllUsers();
+
+        for(int index = 0;index<all_users.size();index++){
+            if (list.size() == 3)
+                break;
+            User cur_user = all_users.get(index);
+            Boolean flag = false;
+            if(followlist != null) {
+                for (int ii = 0; ii < followlist.size(); ii++) {
+                    ObjectId user_follow = followlist.get(ii);
+                    //System.out.println(cur_user.getUsername()+" "+user_follow.getUsername());
+                    if (Objects.equals(cur_user.getId(), user_follow))
+                        flag = true;
+                }
+            }
+            if(flag == false && !cur_user.getUsername().equals(username)){
+                Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
+                list.add(searchbody);
+            }
+
+
+        }
+
+
+        ResponseEntity response = new ResponseEntity<>(list,HttpStatus.OK);
+        return response;
+    }
+
     @PostMapping("/search/{username}")
     public ResponseEntity<User> searchUser(@RequestBody Map<String,List<String>> body,@PathVariable String username){
         List<Searchbody> list = new ArrayList<>();
         List<String> keywords = body.get("keywords");
 
         User search_user = userService.FindUserByUsername(username);
-
-        //ObjectMapper objectMapper = new ObjectMapper();
 
         for(int i=0;i<keywords.size();i++){
             if(keywords.get(i) == "")
@@ -124,7 +175,10 @@ public class UserController {
                             flag = true;
                     }
                 }
-
+                if(cur_user.getAvatar() != null){
+                    Media media = cur_user.getAvatar();
+                    media.setData(mediaService.downloadFile(media.getFilename()));
+                }
                 Searchbody searchbody = new Searchbody(cur_user.getAvatar(),flag,cur_user.getUsername());
                 if(!list.contains(searchbody) && !Objects.equals(cur_user.getId(), search_user.getId())){
                     list.add(searchbody);
@@ -157,7 +211,10 @@ public class UserController {
         System.out.println(username);
         User user = userService.FindUserByUsername(username);
         if(user != null){
+            userService.updateUserAvatar(user);
             user.setPosts(postService.getPostsByUser(user));
+            userService.setFollowing(user);
+            userService.setFollowers(user);
         }
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
@@ -212,4 +269,32 @@ public class UserController {
         return new ResponseEntity<>(postService.savedPosts(user),HttpStatus.OK);
     }
 
+
+    @PostMapping("/user/update/{originUsername}")
+    public ResponseEntity<ResponseFormat> updateUser(@PathVariable String originUsername, @RequestParam("fullname") String fullname, @RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("phone") String phone, @RequestParam("gender") String gender) throws IOException {
+        userService.updateUserProfile(originUsername, fullname, username, email, phone, gender);
+        ResponseFormat responseFormat = new ResponseFormat("",1,"success");
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
+
+    @PostMapping("/user/changePwd/{username}")
+    public ResponseEntity<ResponseFormat> changePwd(@PathVariable String username, @RequestParam("oldPwd") String oldPwd, @RequestParam("newPwd") String newPwd) throws IOException {
+        Integer resultCode = userService.changePwd(username, oldPwd, newPwd);
+        ResponseFormat responseFormat = null;
+        if(resultCode == 1){
+            responseFormat = new ResponseFormat("",1,"success");
+        }
+        else if(resultCode == 2){
+            responseFormat = new ResponseFormat("",2,"fail: the old password is incorrect");
+        }
+        return new ResponseEntity<>(responseFormat,HttpStatus.OK);
+    }
+
+    //SHA1算法
+    public String encode_password(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(str.getBytes("utf-8"));
+        byte[] digest = md.digest();
+        return String.valueOf(Hex.encodeHex(digest));
+    }
 }

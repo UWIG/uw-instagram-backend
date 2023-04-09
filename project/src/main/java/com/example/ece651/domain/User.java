@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -36,6 +37,8 @@ public class User {
     private String fullname;
     private List<ObjectId> followees;
     private List<ObjectId> follows;
+    private List<Searchbody> followers;
+    private List<Searchbody> following;
     private List<ObjectId> postIds;
     private List<Post> posts;
     private List<ObjectId> saved_posts;
@@ -55,6 +58,10 @@ public class User {
     }
 
     public User() {
+        this.follows = new ArrayList<ObjectId>() ;
+        this.followees = new ArrayList<ObjectId>() ;
+        this.like_posts = new ArrayList<ObjectId>() ;
+        this.saved_posts = new ArrayList<ObjectId>() ;
     }
 
 }

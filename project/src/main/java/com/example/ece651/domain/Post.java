@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.sql.rowset.RowSetMetaDataImpl;
 import java.util.Date;
 import java.util.List;
 
@@ -24,10 +25,8 @@ public class Post {
 
     private String id;
     private String username;
-    @DBRef
-    private Media avatar;
 
-    private String type;
+    private Media avatar;
     private String caption;
     private String location;
     private Date time_created;
@@ -46,20 +45,19 @@ public class Post {
     private Boolean whether_saved;
     private Boolean whether_followed_post_user;
 
+    private String[] hashtags;
+
     public Post() {
     }
 
-    public Post(String username, Media avatar, String caption, List<Media> mediaList) {
+    public Post(String username, String caption, List<Media> mediaList) {
         this.username = username;
-        this.avatar = avatar;
         this.caption = caption;
         this.mediaList = mediaList;
         this.oid = new ObjectId();
         this.id = this.oid.toHexString();
         this.time_created = new Date();
         this.time_modified = new Date();
-        this.whether_liked = false;
-        this.whether_followed_post_user = false;
     }
 
 

@@ -18,12 +18,22 @@ public interface UserService {
     User FindUserByUsername(String username);
     List<User> FindUserByEmail(String email);
     List<User> FindUserBykeyword(String keyword);
+    List<User> AllUsers();
     User FindUserByUserId(ObjectId id);
-    Media FindAvatarByUsername(String username);
     String AddUserFollowList(String currentUserName, String targetUserName);
     String DeleteUserFollowList(String currentUserName, String targetUserName);
     void savePost(String username, String postId);
     void cancelSavePost(String username, String postId);
     void DeleteUser(User user);
+    void updateUserProfile(String originUsername, String fullname, String username, String email, String phone, String gender);
+    Integer changePwd(String username, String oldPwd, String newPwd);
+
+    void setFollowers(User user);
+
+    void setFollowing(User user);
+
+    Media FindAvatarByUsername(String username);
+
+    void updateUserAvatar(User user);
 
 }

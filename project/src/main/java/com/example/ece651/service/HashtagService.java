@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -25,6 +23,7 @@ public class HashtagService {
 
     public void addHashtags(String hashtags, Post post) throws IOException {
         String[] tags = hashtags.split(",");
+        post.setHashtags(tags);
         for(String tag: tags){
             //if tag in the database
             String hashtag = tag.substring(1);
@@ -35,7 +34,7 @@ public class HashtagService {
                         .first();
             }else{
             //tag not in the database
-                Hashtag newHashtag = new Hashtag(tag, post);
+                Hashtag newHashtag = new Hashtag(hashtag, post);
                 mongoTemplate.insert(newHashtag,"hashtag");
             }
         }
@@ -47,10 +46,4 @@ public class HashtagService {
         return mongoTemplate.findOne(query, Hashtag.class, "hashtag");
     }
 
-
-    public List<Post> getPostsByHashtag(String hashtag){
-        Hashtag tag = getHashtag(hashtag);
-        System.out.println(tag.getTag());
-        return tag.getPostList();
-    }
 }

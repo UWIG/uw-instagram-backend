@@ -1,39 +1,35 @@
 package com.example.ece651.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
+@Data
+@NoArgsConstructor
 public class Searchbody {
     private Media avatar;
     private boolean isFollowing;
     private String username;
+    private String fullname;
     public Searchbody(Media avatar, boolean isFollowing, String username){
         this.avatar =avatar;
         this.isFollowing =isFollowing;
         this.username = username;
     }
 
-    public Media getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(Media avatar) {
-        this.avatar = avatar;
-    }
-
-    public boolean isFollowing() {
-        return isFollowing;
-    }
-
-    public void setFollowing(boolean following) {
-        isFollowing = following;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
+    public Searchbody(Media avatar, String username, String fullname){
+        this.avatar =avatar;
         this.username = username;
+        this.fullname = fullname;
+    }
+
+    public Searchbody(Media avatar, boolean isFollowing, String username, String fullname) {
+        this.avatar = avatar;
+        this.isFollowing = isFollowing;
+        this.username = username;
+        this.fullname = fullname;
     }
 
     @Override

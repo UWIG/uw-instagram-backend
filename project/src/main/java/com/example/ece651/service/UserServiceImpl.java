@@ -1,8 +1,7 @@
 package com.example.ece651.service;
 
-import com.example.ece651.domain.Comment;
-import com.example.ece651.domain.Media;
-import com.example.ece651.domain.User;
+import com.example.ece651.domain.*;
+import com.example.ece651.util.ResponseFormat;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
 import org.bson.BsonBinarySubType;
@@ -13,7 +12,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private MediaService mediaService;
 
     private static final String COLLECTION_NAME = "user";
 
@@ -70,8 +76,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Media UpdateUserByAvatar(String username, MultipartFile avatar) throws IOException {
-        Media media = new Media(new Binary(BsonBinarySubType.BINARY, avatar.getBytes()));
-//
+        Media media = new Media(mediaService.saveFile(avatar));
+
         Criteria criteria = Criteria.where("username").is(username);
         Query query = new Query(criteria);
         //find the user
@@ -86,9 +92,10 @@ public class UserServiceImpl implements UserService {
         else {
             Media prevMedia = user.getAvatar();
             mongoTemplate.update(Media.class).matching(Criteria.where("_id").is(prevMedia.getId()))
-                    .apply(new Update().set("data", media.getData()))
+                    .apply(new Update().set("filename", avatar.getOriginalFilename()))
                     .first();
         }
+        media.setData(mediaService.downloadFile(avatar.getOriginalFilename()));
         return media;
     }
 
@@ -124,6 +131,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> AllUsers() {
+        return mongoTemplate.findAll(User.class,"user");
+    }
+
+    @Override
     public User FindUserByUserId(ObjectId id) {
         Criteria criteria = Criteria.where("_id").is(id);
         Query query = new Query(criteria);
@@ -131,13 +143,7 @@ public class UserServiceImpl implements UserService {
         return documentList.get(0);
     }
 
-    @Override
-    public Media FindAvatarByUsername(String username) {
-        Criteria criteria = Criteria.where("username").is(username);
-        Query query = new Query(criteria);
-        Media media = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0).getAvatar();
-        return media;
-    }
+
 
     @Override
     public String AddUserFollowList(String currentUserName, String targetUserName) {
@@ -212,5 +218,92 @@ public class UserServiceImpl implements UserService {
         ObjectId id = new ObjectId(postId);
         mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
                 .apply(new Update().pull("saved_posts",id)).first();
+    }
+
+    @Override
+    public void setFollowing(User user){
+        List<Searchbody> followingList = new ArrayList<>();
+        if(user.getFollows() != null){
+            for(ObjectId id: user.getFollows()){
+                User following = FindUserByUserId(id);
+                updateUserAvatar(following);
+                followingList.add(new Searchbody(following.getAvatar(),true, following.getUsername(),following.getFullname()));
+            }
+        }
+        user.setFollowing(followingList);
+    }
+
+    @Override
+    public void setFollowers(User user){
+        List<Searchbody> followerList = new ArrayList<>();
+        if(user.getFollowees() != null){
+            for(ObjectId id: user.getFollowees()){
+                User follower = FindUserByUserId(id);
+                updateUserAvatar(follower);
+                boolean isFollowing = false;
+                if(user.getFollows() != null){
+                    for(ObjectId oid: user.getFollows()){
+                        if(id.equals(oid)) {
+                            isFollowing = true;
+                            break;
+                        }
+                    }
+                }
+                followerList.add(new Searchbody(follower.getAvatar(), isFollowing, follower.getUsername(), follower.getFullname()));
+            }
+        }
+        user.setFollowers(followerList);
+    }
+
+    @Override
+    public Media FindAvatarByUsername(String username) {
+        Criteria criteria = Criteria.where("username").is(username);
+        Query query = new Query(criteria);
+        Media media = mongoTemplate.findOne(query, User.class, "user").getAvatar();
+        if(media != null){
+            media.setData(mediaService.downloadFile(media.getFilename()));
+        }
+        return media;
+    }
+
+    @Override
+    public void updateUserAvatar(User user) {
+        if (user.getAvatar() != null) {
+            Media media = user.getAvatar();
+            media.setData(mediaService.downloadFile(media.getFilename()));
+        }
+    }
+
+    @Override
+    public void updateUserProfile(String originUsername, String fullname, String username, String email, String phone, String gender) {
+        Update update = new Update();
+        update.set("fullname",fullname);
+        update.set("username",username);
+        update.set("email",email);
+        update.set("phoneNumber",phone);
+        update.set("gender",gender);
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(originUsername));
+        User user = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0);
+
+        mongoTemplate.update(User.class).matching(Criteria.where("_id").is(user.getId()))
+                .apply(update)
+                .first();
+    }
+
+    @Override
+    public Integer changePwd(String username, String oldPwd, String newPwd) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(username));
+        User user = mongoTemplate.find(query, User.class, COLLECTION_NAME).get(0);
+        if(user.getPassword().equals(oldPwd)){
+            mongoTemplate.update(User.class).matching(Criteria.where("username").is(username))
+                    .apply(new Update().set("password",newPwd))
+                    .first();
+            return 1;
+        }else{
+            return 2;
+        }
     }
 }

@@ -31,9 +31,4 @@ public class Hashtag {
         this.postList = new ArrayList<>();
         this.postList.add(post);
     }
-
-
-
-
-
 }
